@@ -17,12 +17,8 @@ class Turtle{
 	double d;
 	double delta;
 
-
-
-	
 	void forward(){
-
-		double noise = distribution(generator);
+		double noise = distribution(generator)*0.5;
 		this->x = this->x + (this->d+noise) * cos(this->a);
 		this->y = this->y + (this->d+noise) * sin(this->a);
 	}
@@ -39,12 +35,12 @@ class Turtle{
         glVertex2d(this->x, this->y);
 	}
 	void plus(){
-		double noise = distribution(generator)*50;
+		double noise = distribution(generator)*25;
 
 		this->a+=this->delta+noise;
 	}
 	void minus(){
-		double noise = distribution(generator)*50;
+		double noise = distribution(generator)*25;
 		this->a-=this->delta+noise;
 	}
 };
@@ -180,17 +176,22 @@ void renderFunction()
     glFlush();
 }
 
-/* Main method - main entry point of application
-the freeglut library does the window creation work for us, 
-regardless of the platform. */
+void timer(int) {
+    glutPostRedisplay();
+    glutTimerFunc(1000/30, timer, 0);
+}
+
+
 int main(int argc, char** argv)
 {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_SINGLE);
     glutInitWindowSize(1200,800);
     glutInitWindowPosition(100,100);
-    glutCreateWindow("OpenGL - First window demo");
+    glutCreateWindow("ALife");
     glutDisplayFunc(renderFunction);
-    glutMainLoop();    
+    timer(0);
+    glutMainLoop();
+
     return 0;
 }
