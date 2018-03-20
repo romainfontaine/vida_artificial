@@ -12,7 +12,8 @@ public:
         ts.push_back(t);
     };
 
-    void exec(const std::string &s) {
+    void Draw(const std::string &s) {
+        glBegin(GL_LINES);
         for (unsigned int i = 0; i < s.length(); i++) {
             switch (s[i]) {
                 case 'f':
@@ -39,6 +40,7 @@ public:
                     break;
             }
         }
+        glEnd();
     }
 };
 
