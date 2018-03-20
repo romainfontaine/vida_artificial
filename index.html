@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title></title>
+</head>
+<body>
+<img id="img" src="big.png"/>
+<p id="out"></p>
+<p id="a">aaaa</p>
+<p id="outb"></p>
+  <script type="text/javascript">
+  	var points = []
+	document.getElementById("img").addEventListener("click", function(a){
+		points.push([a.x, a.y, 1])
+		console.log(a.x, a.y)
+		document.getElementById("out").innerHTML = JSON.stringify(points)
+
+		var xs = points.map(function(a){return a[0]})
+		var min_xs = Math.min.apply(null, xs);
+		var max_xs = Math.max.apply(null, xs);
+		var ys = points.map(function(a){return a[1]})
+		var min_ys = Math.min.apply(null, ys);
+		var max_ys = Math.max.apply(null, ys);
+
+		var pts_bet = points.map(function(a){return [(a[0]-min_xs)/(max_xs-min_xs), 1-(a[1]-min_ys)/(max_ys-min_ys), 1]})
+		document.getElementById("outb").innerHTML = JSON.stringify(pts_bet)
+
+	});
+</script>
+
+</body>
+</html>
