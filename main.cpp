@@ -4,16 +4,27 @@
 #include <vector>
 #include <map>
 #include <iostream>
+#include <random>
+
+
+  std::default_random_engine generator;
+  std::normal_distribution<double> distribution(0.,0.0005);
+
 class Turtle{
 	double x;
 	double y;
 	double a;
 	double d;
 	double delta;
+
+
+
 	
 	void forward(){
-		this->x = this->x + this->d * cos(this->a);
-		this->y = this->y + this->d * sin(this->a);
+
+		double noise = distribution(generator);
+		this->x = this->x + (this->d+noise) * cos(this->a);
+		this->y = this->y + (this->d+noise) * sin(this->a);
 	}
 
 	public:
@@ -23,15 +34,18 @@ class Turtle{
 		this->forward();
 	}
 	void F(){
-        glVertex2f(this->x, this->y);
+        glVertex2d(this->x, this->y);
 		this->forward();
-        glVertex2f(this->x, this->y);
+        glVertex2d(this->x, this->y);
 	}
 	void plus(){
-		this->a+=this->delta;
+		double noise = distribution(generator)*50;
+
+		this->a+=this->delta+noise;
 	}
 	void minus(){
-		this->a-=this->delta;
+		double noise = distribution(generator)*50;
+		this->a-=this->delta+noise;
 	}
 };
 
@@ -101,6 +115,44 @@ void expandExp(const char &init, const std::map<char, std::string> &rules, int n
 }
 
 
+struct Point
+{
+	double x,y,z;
+	Point(double x, double y, double z):x(x), y(y), z(z){};
+
+};
+
+//std::vector<Point> shape {{0,0,0},{.1,.1,0},{.2,0,0},{.1,-.1,0}};
+std::vector<Point> shape {{0,0,1},
+{13,51,1},
+{44,95,1},
+{101,134,1},
+{164,142,1},
+{257,125,1},
+{321,84,1},
+{415,154,1},
+{397,0,1},
+{415,-154,1},
+{321,-84,1},
+{257,-125,1},
+{164,-142,1},
+{101,-134,1},
+{44,-95,1},
+{13,-51,1},
+{0,0,1}};
+
+
+void drawShape(const std::vector<Point> points){
+	glBegin(GL_LINE_LOOP);
+    
+	for(const Point &p:points)
+    	glVertex3d(p.x*0.001, p.y*0.001, p.z);
+
+
+    glEnd();
+    glFlush();
+}
+
 /* display function - code from:
      http://fly.cc.fer.hr/~unreal/theredbook/chapter01.html
 This is the actual usage of the OpenGL library. 
@@ -116,8 +168,6 @@ void renderFunction()
 	//expandExp('F', {{'F',"FF-[-F+F+F]+[+F-F-F]"}}, 4, out);
 	//expandExp('F', {{'F',"F[+F]F[-F][F]"}}, 5, out);
 	expandExp('X', {{'F',"FF"},{'X',"F[+X]F[-X]+X"}}, 7, out);
-	std::cout<<out<<std::endl;
-
     glClearColor(0.0, 0.0, 0.0, 0.0);
     glClear(GL_COLOR_BUFFER_BIT);
     glColor3f(1.0, 1.0, 1.0);
@@ -126,6 +176,7 @@ void renderFunction()
     	ti.exec(out);
 
     glEnd();
+    drawShape(shape);
     glFlush();
 }
 
