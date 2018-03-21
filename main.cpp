@@ -5,9 +5,6 @@
 #include <map>
 #include <iostream>
 
-#include "TurtleInterpreter.h"
-#include "LSystem.h"
-
 struct Point
 {
     double x, y, z;
@@ -17,56 +14,19 @@ struct Point
     };
 };
 
-class Animal
+struct Color
 {
-private:
-    std::vector<Point> shape;
-    double scaleX, scaleY;
-public:
+    double r, g, b;
 
-    Animal(const std::vector<Point> &shape, const double &scaleX = 1, const double &scaleY = 1) :
-    shape(shape), scaleX(scaleX), scaleY(scaleY)
+    Color(double r, double g, double b) : r(r), g(g), b(b)
     {
-
-    }
-
-    void setScaleX(const double &scaleX)
-    {
-        this->scaleX = scaleX;
-    }
-
-    void setScaleY(const double &scaleY)
-    {
-        this->scaleY = scaleY;
-    }
-
-    void Draw(double x = 0, double y = 0)
-    {
-        glBegin(GL_LINE_LOOP);
-        for (const Point &p : shape)
-            glVertex3d(x + p.x * scaleX, y + p.y * scaleY, p.z);
-        glEnd();
-    }
+    };
 };
 
-class Plant
-{
-    std::string repr;
-    LSystem l;
-    Turtle t;
-public:
-
-    Plant(const Turtle &t, const LSystem &l, const int &n) : l(l), t(t)
-    {
-        l.generate(n, repr);
-    }
-
-    void Draw()
-    {
-        TurtleInterpreter ti(t);
-        ti.Draw(repr);
-    }
-};
+#include "TurtleInterpreter.h"
+#include "LSystem.h"
+#include "Animal.h"
+#include "Plant.h"
 
 
 std::vector<Point>shape{
@@ -136,27 +96,26 @@ std::vector<Point> shape2{
     {-0.5, 0.2055837563, 1}
 };
 
-bool XInc = true, YInc = true;
-const double mini = .5, maxi = 1.1, step = .05;
-double currX = mini, currY = mini;
 
-Plant p1(Turtle(.0035, 20, -.5, -1, .5, .1), LSystem('X',{
-    {'F', "FF"},
-    {'X', "F[+X]F[-X]+X"}
-}), 7);
-
-Plant p2(Turtle(.02, 20, .5, -1, .5, .2), LSystem('F',{
-    {'F', "FF-[-F+F+F]+[+F-F-F]"}
-}), 4);
-Animal a1(shape, currX, currY);
-Animal a2(shape2, currX, currY);
+const double mini = .5, maxi = 1., step = .01;
 
 std::vector<double> xs;
 std::vector<double> ys;
 int i = 0;
 
-/* display function - code from:
-     http://fly.cc.fer.hr/~unreal/theredbook/chapter01.html */
+
+Plant p1(Turtle(.0035, 20, -.5, -1, .5, .1), LSystem('X',{
+    {'F', "FF"},
+    {'X', "F[+X]F[-X]+X"}
+}), 7, Color(43. / 255, 112. / 255, 46. / 255));
+
+Plant p2(Turtle(.02, 20, .5, -1, .5, .2), LSystem('F',{
+    {'F', "FF-[-F+F+F]+[+F-F-F]"}
+}), 4, Color(96. / 255, 140. / 255, 93. / 255));
+
+Animal a1(shape, mini, mini);
+Animal a2(shape2, mini, mini);
+
 void renderFunction()
 {
     a1.setScaleX(xs[i]);
@@ -164,15 +123,12 @@ void renderFunction()
     a2.setScaleX(xs[i]);
     a2.setScaleY(ys[i]);
     i++;
-    i%=xs.size();
-
+    i %= xs.size();
 
     glClearColor(0.0, 0.0, 0.0, 0.0);
     glClear(GL_COLOR_BUFFER_BIT);
     glColor3f(1.0, 1.0, 1.0);
     glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
-
-
 
     p1.Draw();
     p2.Draw();
@@ -190,18 +146,14 @@ void timer(int)
 
 int main(int argc, char** argv)
 {
-    for (double x = mini; x < maxi; x += step)
+    for (double x = mini; x < maxi; x += step*15)
+    {
         for (double y = mini; y < maxi; y += step)
         {
             xs.push_back(x);
             ys.push_back(y);
         }
-    for (double x = maxi; x > mini; x -= step)
-        for (double y = maxi; y > mini; y -= step)
-        {
-            xs.push_back(x);
-            ys.push_back(y);
-        }
+    }
 
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_SINGLE);
