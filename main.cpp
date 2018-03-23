@@ -29,7 +29,7 @@ struct Color
 #include "Plant.h"
 
 
-std::vector<Point> fish1 {
+std::vector<Point> fish1{
     {-0.4375, -0.0692307692, 1},
     {-0.5, 0.1846153846, 1},
     {-0.375, 0.1461538462, 1},
@@ -53,7 +53,7 @@ std::vector<Point> fish1 {
     {-0.4375, -0.1076923077, 1}
 };
 
-std::vector<Point> fish2 {
+std::vector<Point> fish2{
     {-0.4981884058, 0.2106598985, 1},
     {-0.3713768116, 0.0837563452, 1},
     {-0.0489130435, 0.2664974619, 1},
@@ -108,15 +108,24 @@ std::vector<double> ys;
 int i = 0;
 
 
+
 Plant p1(Turtle(.0035, 20, -.5, -1, 1.5, .05), LSystem('X',{
-    {'F', "FF"},
-    {'X', "F[+X]F[-X]+X"}
+    {'F',
+        {"FF"}},
+    {'X',
+        {"F[+X]F[-X]+X"}}
 }), 7, Color(43. / 255, 112. / 255, 46. / 255));
 
 Plant p2(Turtle(.02, 20, .5, -1, .3, .1), LSystem('F',{
-    {'F', "FF-[-F+F+F]+[+F-F-F]"}
-}), 4, Color(96. / 255, 140. / 255, 93. / 255));
+    {'F',
+        {"FF-[-F+F+F]+[+F-F-F]"}}
+}), 4, Color(43. / 255, 112. / 255, 46. / 255));
 
+
+Plant p3(Turtle(.02, 20, 0, -1, 1, .1), LSystem('F',{
+    {'F',
+        {"F[+F]F[-F]F", "F[+F]F", "F[-F]F"}}
+}), 5, Color(96. / 255, 140. / 255, 93. / 255));
 Animal a1(fish1, mini, mini);
 Animal a2(fish2, mini, mini);
 
@@ -136,6 +145,7 @@ void renderFunction()
 
     p1.Draw();
     p2.Draw();
+    p3.Draw();
 
     a1.Draw(.5, .5);
     a2.Draw(-.5, .5);
