@@ -9,7 +9,7 @@ public:
     LSystem(const char &init, const std::map<char, std::vector<std::string>> &rules) : init(init), rules(rules) {
     };
 
-    void generate(const int n, std::string &out) const {
+    void generate(const unsigned int &n, std::string &out) const {
         std::vector<char> prev, curr;
 
         prev.push_back(init);
