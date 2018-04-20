@@ -27,6 +27,7 @@ struct Color
 #include "LSystem.h"
 #include "Animal.h"
 #include "Plant.h"
+#include "Boid.h"
 
 
 std::vector<Point> fish1{
@@ -96,7 +97,7 @@ std::vector<Point> fish2{
     {0.0, 0.2055837563, 1}
 };
 
-const double mini = .3, maxi = .7, step = .01;
+const double mini = .1, maxi = .2, step = .01;
 
 std::vector<double> ps;
 std::vector<double> xs;
@@ -125,6 +126,8 @@ Plant p3(Turtle(.02, 20, 0, -1, 1, .1), LSystem('F',{
 Animal a1(fish1, mini, mini);
 Animal a2(fish2, mini, mini);
 
+std::vector<Boid> preys;
+
 void renderFunction()
 {
     a1.setScaleX(xs[i]);
@@ -147,6 +150,12 @@ void renderFunction()
 
     a1.Draw(.5, .5);
     a2.Draw(-.5, .5);
+
+    for (Boid &p : preys)
+    {
+        p.update(preys, a2);
+    }
+
     glFlush();
 }
 
@@ -171,9 +180,18 @@ int main(int argc, char** argv)
         }
     }
 
+    std::random_device rd;
+    std::default_random_engine re(rd());
+
+    std::uniform_real_distribution<double> unif(-1, 1);
+    for (int i = 0; i < 10; i++)
+    {
+        preys.push_back(Boid(unif(re), unif(re)));
+    }
+
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_SINGLE);
-    glutInitWindowSize(1200, 800);
+    glutInitWindowSize(1500, 900);
     glutInitWindowPosition(100, 100);
     glutCreateWindow("ALife");
     glutDisplayFunc(renderFunction);

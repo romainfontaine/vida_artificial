@@ -24,8 +24,8 @@ public:
         this->scaleY = scaleY;
     }
 
-    void Draw(double x = 0, double y = 0) {
-        x-=0.5*scaleX; // Center
+    void Draw(double x = 0, double y = 0) const {
+        x -= 0.5 * scaleX; // Center
         glColor3d(1., 1., 1.);
         glBegin(GL_LINE_LOOP);
         for (const Point &p : shape) {
@@ -36,7 +36,7 @@ public:
         glEnd();
     }
 
-    double sign(double d) {
+    static double sign(double d) {
         if (d > .05)
             return 1;
         if (d<-.05)
