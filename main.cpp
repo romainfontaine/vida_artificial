@@ -128,6 +128,51 @@ Animal a2(fish2, mini, mini);
 
 std::vector<Boid> preys;
 
+const int n_food_sites = 100;
+
+int foodCapacity[n_food_sites][n_food_sites] = {};
+int foodCurrent[n_food_sites][n_food_sites] = {};
+
+int maxCapacity = 10;
+
+void generateFood()
+{
+    // X, Y, STD, QTY
+    int food_sites[][4] = {
+        {25, 15, 5, 1000},
+        {50, 50, 5, 1000},
+        {80, 35, 4, 1000},
+    };
+
+    std::random_device rd{};
+    std::mt19937 gen{rd()};
+
+    for (unsigned int k = 0; k<sizeof(food_sites) / sizeof (int) / 4; k++)
+    {
+        std::normal_distribution<> d{0, (double)food_sites[k][2]};
+
+        unsigned int qty = 500;
+        for (unsigned int i = 0; i < qty; i++)
+        {
+            int x = (int) round(d(gen)), y = (int) round(d(gen));
+            x+=food_sites[k][0]+n_food_sites;
+            y+=food_sites[k][1]+n_food_sites;
+            x%=n_food_sites;
+            y%=n_food_sites;
+            foodCapacity[x][y] += 1;
+        }
+        for (int i = 0; i < n_food_sites; i++)
+        {
+            for (int j = 0; j < n_food_sites; j++)
+            {
+                foodCurrent[i][j] = foodCapacity[i][j];
+            }
+        }
+    }
+
+
+}
+
 void renderFunction()
 {
     a1.setScaleX(xs[i]);
@@ -155,6 +200,27 @@ void renderFunction()
     {
         p.update(preys, a2);
     }
+    double x, y;
+    int i, j;
+    double food_site_size = 2. / n_food_sites;
+    for (i = 0, x = -1.; i < n_food_sites; i++, x += food_site_size)
+    {
+        for (j = 0, y = -1.; j < n_food_sites; j++, y += food_site_size)
+        {
+            if (foodCurrent[i][j] < 1)
+            {
+                continue;
+            }
+            glColor4d(46. / 255, 204. / 255, 113. / 255, .5 + ((double) foodCurrent[i][j]) / maxCapacity / 2);
+            glBegin(GL_TRIANGLES);
+
+            glVertex2d(x + food_site_size / 6, y + food_site_size / 6);
+            glVertex2d(x + food_site_size * 5. / 6., y + food_site_size / 6);
+            glVertex2d(x + food_site_size / 2, y + food_site_size);
+
+            glEnd();
+        }
+    }
 
     glFlush();
 }
@@ -179,6 +245,7 @@ int main(int argc, char** argv)
             }
         }
     }
+    generateFood();
 
     std::random_device rd;
     std::default_random_engine re(rd());
@@ -195,6 +262,8 @@ int main(int argc, char** argv)
     glutInitWindowPosition(100, 100);
     glutCreateWindow("ALife");
     glutDisplayFunc(renderFunction);
+    glEnable(GL_BLEND); // Enable transparency
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     timer(0);
     glutMainLoop();
 
