@@ -23,6 +23,7 @@ class Boid {
 protected:
     double x, y, vx, vy;
     int id;
+    int foodStock = 0;
 public:
 
     Boid(const double &x = 0, const double &y = 0, const double &vx = 0, const double &vy = 0)
@@ -62,7 +63,10 @@ private:
             for (int j = -2; j <= 2; j++) {
                 int x = (xgrid + i) % n_food_sites;
                 int y = (ygrid + j) % n_food_sites;
-                foodCurrent[x][y] = 0;
+                if (foodCurrent[x][y] > 0) {
+                    foodStock+=foodCurrent[x][y];
+                    foodCurrent[x][y] = -foodCapacity[x][y]*100;
+                }
 
             }
         }

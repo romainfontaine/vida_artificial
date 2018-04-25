@@ -147,18 +147,18 @@ void generateFood()
     std::random_device rd{};
     std::mt19937 gen{rd()};
 
-    for (unsigned int k = 0; k<sizeof(food_sites) / sizeof (int) / 4; k++)
+    for (unsigned int k = 0; k<sizeof (food_sites) / sizeof (int) / 4; k++)
     {
-        std::normal_distribution<> d{0, (double)food_sites[k][2]};
+        std::normal_distribution<> d{0, (double) food_sites[k][2]};
 
         unsigned int qty = 500;
         for (unsigned int i = 0; i < qty; i++)
         {
             int x = (int) round(d(gen)), y = (int) round(d(gen));
-            x+=food_sites[k][0]+n_food_sites;
-            y+=food_sites[k][1]+n_food_sites;
-            x%=n_food_sites;
-            y%=n_food_sites;
+            x += food_sites[k][0] + n_food_sites;
+            y += food_sites[k][1] + n_food_sites;
+            x %= n_food_sites;
+            y %= n_food_sites;
             foodCapacity[x][y] += 1;
         }
         for (int i = 0; i < n_food_sites; i++)
@@ -169,8 +169,17 @@ void generateFood()
             }
         }
     }
+}
 
-
+void regenerateFood()
+{
+    for (int i = 0; i < n_food_sites; i++)
+    {
+        for (int j = 0; j < n_food_sites; j++)
+        {
+            foodCurrent[i][j] = std::min(foodCurrent[i][j] + 1, foodCapacity[i][j]);
+        }
+    }
 }
 
 void renderFunction()
@@ -200,6 +209,8 @@ void renderFunction()
     {
         p.update(preys, a2);
     }
+    regenerateFood();
+
     double x, y;
     int i, j;
     double food_site_size = 2. / n_food_sites;
