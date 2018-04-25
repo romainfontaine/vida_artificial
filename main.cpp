@@ -131,17 +131,17 @@ const int n_food_sites = 100;
 int foodCapacity[n_food_sites][n_food_sites] = {};
 int foodCurrent[n_food_sites][n_food_sites] = {};
 
-int maxCapacity = 10;
+int maxCapacity = 100;
 #include "Boid.h"
 std::vector<Boid> preys;
 
 void generateFood()
 {
     // X, Y, STD, QTY
-    int food_sites[][4] = {
-        {25, 15, 5, 1000},
-        {50, 50, 5, 1000},
-        {80, 35, 4, 1000},
+    unsigned int food_sites[][4] = {
+        {25, 15, 3, 5000},
+        {50, 50, 5, 20000},
+        {80, 35, 4, 5000},
     };
 
     std::random_device rd{};
@@ -151,15 +151,14 @@ void generateFood()
     {
         std::normal_distribution<> d{0, (double) food_sites[k][2]};
 
-        unsigned int qty = 500;
-        for (unsigned int i = 0; i < qty; i++)
+        for (unsigned int i = 0; i < food_sites[k][3]; i++)
         {
             int x = (int) round(d(gen)), y = (int) round(d(gen));
             x += food_sites[k][0] + n_food_sites;
             y += food_sites[k][1] + n_food_sites;
             x %= n_food_sites;
             y %= n_food_sites;
-            foodCapacity[x][y] += 1;
+            foodCapacity[x][y] += 4;
         }
         for (int i = 0; i < n_food_sites; i++)
         {
@@ -203,11 +202,13 @@ void renderFunction()
     p3.Draw();
 
     a1.Draw(.5, .5);
-    a2.Draw(-.5, .5);
 
-    for (Boid &p : preys)
+    for (unsigned int i = 0; i<preys.size();i++)
     {
-        p.update(preys, a2);
+        preys[i].update(preys, a2);
+        if(!preys[i].consumeEnergy()){
+            preys.erase(preys.begin()+i);
+        }
     }
     regenerateFood();
 

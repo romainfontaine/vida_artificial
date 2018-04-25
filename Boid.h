@@ -23,8 +23,19 @@ class Boid {
 protected:
     double x, y, vx, vy;
     int id;
-    int foodStock = 0;
+    int foodStock = 100;
+    int metabolism = 1;
 public:
+
+    void operator=(const Boid &b) {
+        x = b.x;
+        y = b.y;
+        vx = b.vx;
+        vy = b.vy;
+        id = b.id;
+        foodStock = b.foodStock;
+        metabolism = b.metabolism;
+    }
 
     Boid(const double &x = 0, const double &y = 0, const double &vx = 0, const double &vy = 0)
     : x(x), y(y), vx(vx), vy(vy), id(ID_COUNT++) {
@@ -52,6 +63,10 @@ public:
         eatFood();
     }
 
+    bool consumeEnergy() {
+        return (foodStock -= metabolism) > 0;
+    }
+
 private:
 
     void eatFood() {
@@ -64,8 +79,8 @@ private:
                 int x = (xgrid + i) % n_food_sites;
                 int y = (ygrid + j) % n_food_sites;
                 if (foodCurrent[x][y] > 0) {
-                    foodStock+=foodCurrent[x][y];
-                    foodCurrent[x][y] = -foodCapacity[x][y]*100;
+                    foodStock += foodCurrent[x][y];
+                    foodCurrent[x][y] = -300;
                 }
 
             }
