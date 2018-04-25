@@ -33,8 +33,10 @@ public:
         std::pair<double, double> c = cohesion(boids);
         std::pair<double, double> s = separation(boids);
         std::pair<double, double> a = alignment(boids);
-        vx += c.first + s.first + a.first;
-        vy += c.second + s.second + a.second;
+        std::pair<double, double> f = food();
+
+        vx += c.first + s.first + a.first + f.first;
+        vy += c.second + s.second + a.second + f.second;
         vx = std::min(vmax, std::max(-vmax, vx));
         vy = std::min(vmax, std::max(-vmax, vy));
         x += vx;
@@ -46,9 +48,25 @@ public:
             y = fmod(y + 3, 2) - 1;
         }
         animal.Draw(x, y);
+        eatFood();
     }
 
 private:
+
+    void eatFood() {
+        int xgrid = (x + 1) / 2 * n_food_sites;
+        int ygrid = (y + 1) / 2 * n_food_sites;
+
+
+        for (int i = -2; i <= 2; i++) {
+            for (int j = -2; j <= 2; j++) {
+                int x = (xgrid + i) % n_food_sites;
+                int y = (ygrid + j) % n_food_sites;
+                foodCurrent[x][y] = 0;
+
+            }
+        }
+    }
 
     double squaredTorusDistance(const Boid &b) const {
         // Source: https://stackoverflow.com/q/2123947/4384857
@@ -95,6 +113,33 @@ private:
         sx /= boids.size() - 1;
         sy /= boids.size() - 1;
         return std::make_pair((sx - vx) / 8, (sy - vy) / 8);
+    }
+
+    std::pair<double, double> food() const {
+        int xgrid = (x + 1) / 2 * n_food_sites;
+        int ygrid = (y + 1) / 2 * n_food_sites;
+
+        int maxF = -1, dirX = 0, dirY = 0;
+        for (int i = -n_food_sites / 10; i <= n_food_sites / 10; i++) {
+            for (int j = -n_food_sites / 10; j <= n_food_sites / 10; j++) {
+                int x = (xgrid + i) % n_food_sites;
+                int y = (ygrid + j) % n_food_sites;
+                if (foodCurrent[x][y] > maxF) {
+                    maxF = foodCurrent[x][y];
+                    dirX = i < 0 ? -1 : (i > 0 ? 1 : 0);
+                    dirY = j < 0 ? -1 : (j > 0 ? 1 : 0);
+                }
+            }
+        }
+        if ((dirX == 0 && dirY == 0) || maxF <= 0) {
+            return std::make_pair(0, 0);
+        } else {
+            double norm = sqrt((dirX * dirX) + (dirY * dirY));
+            double dx = (double) dirX / norm;
+            double dy = (double) dirY / norm;
+            const double food_fact = .1;
+            return std::make_pair(dx*food_fact, dy * food_fact);
+        }
     }
 };
 int Boid::ID_COUNT = 0;

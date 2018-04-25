@@ -27,7 +27,6 @@ struct Color
 #include "LSystem.h"
 #include "Animal.h"
 #include "Plant.h"
-#include "Boid.h"
 
 
 std::vector<Point> fish1{
@@ -126,7 +125,6 @@ Plant p3(Turtle(.02, 20, 0, -1, 1, .1), LSystem('F',{
 Animal a1(fish1, mini, mini);
 Animal a2(fish2, mini, mini);
 
-std::vector<Boid> preys;
 
 const int n_food_sites = 100;
 
@@ -134,6 +132,8 @@ int foodCapacity[n_food_sites][n_food_sites] = {};
 int foodCurrent[n_food_sites][n_food_sites] = {};
 
 int maxCapacity = 10;
+#include "Boid.h"
+std::vector<Boid> preys;
 
 void generateFood()
 {
