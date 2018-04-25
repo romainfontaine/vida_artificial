@@ -131,7 +131,7 @@ const int n_food_sites = 100;
 int foodCapacity[n_food_sites][n_food_sites] = {};
 int foodCurrent[n_food_sites][n_food_sites] = {};
 
-int maxCapacity = 100;
+int maxCapacity = 250;
 #include "Boid.h"
 std::vector<Boid> preys;
 

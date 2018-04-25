@@ -25,6 +25,8 @@ protected:
     int id;
     int foodStock = 100;
     int metabolism = 1;
+    int age = 0;
+    int agelimit = 1000;
 public:
 
     void operator=(const Boid &b) {
@@ -35,6 +37,8 @@ public:
         id = b.id;
         foodStock = b.foodStock;
         metabolism = b.metabolism;
+        age = b.age;
+        agelimit = b.agelimit;
     }
 
     Boid(const double &x = 0, const double &y = 0, const double &vx = 0, const double &vy = 0)
@@ -64,7 +68,7 @@ public:
     }
 
     bool consumeEnergy() {
-        return (foodStock -= metabolism) > 0;
+        return ((foodStock -= metabolism) > 0) && (age++<agelimit);
     }
 
 private:
