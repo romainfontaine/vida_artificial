@@ -27,6 +27,7 @@ protected:
     int metabolism = 1;
     int age = 0;
     int agelimit = 1000;
+    int vision = 10;
 public:
 
     void operator=(const Boid &b) {
@@ -39,6 +40,7 @@ public:
         metabolism = b.metabolism;
         age = b.age;
         agelimit = b.agelimit;
+        vision = b.vision;
     }
 
     Boid(const double &x = 0, const double &y = 0, const double &vx = 0, const double &vy = 0)
@@ -92,9 +94,13 @@ private:
     }
 
     double squaredTorusDistance(const Boid &b) const {
+        return squaredTorusDistance(2, x, y, b.x, b.y);
+    }
+
+    static double squaredTorusDistance(const double &size, const double &fx, const double &fy, const double &nx, const double &ny) {
         // Source: https://stackoverflow.com/q/2123947/4384857
-        double a = std::min(std::abs(x - b.x), 2. - std::abs(x - b.x));
-        double x = std::min(std::abs(y - b.y), 2. - std::abs(y - b.y));
+        double a = std::min(std::abs(fx - nx), size - std::abs(fx - nx));
+        double x = std::min(std::abs(fy - ny), size - std::abs(fy - ny));
         return a * a + x * x;
     }
 
@@ -142,12 +148,14 @@ private:
         int xgrid = (x + 1) / 2 * n_food_sites;
         int ygrid = (y + 1) / 2 * n_food_sites;
 
-        int maxF = -1, dirX = 0, dirY = 0;
-        for (int i = -n_food_sites / 10; i <= n_food_sites / 10; i++) {
-            for (int j = -n_food_sites / 10; j <= n_food_sites / 10; j++) {
+        int maxF = -1, dirX = 0, dirY = 0, minD = 0;
+        for (int i = -vision; i <= vision; i++) {
+            for (int j = -vision; j <= vision; j++) {
                 int x = (xgrid + i) % n_food_sites;
                 int y = (ygrid + j) % n_food_sites;
-                if (foodCurrent[x][y] > maxF) {
+                int d = squaredTorusDistance(n_food_sites, xgrid, ygrid, x, y);
+                if (foodCurrent[x][y] > maxF || (foodCurrent[x][y] == maxF && d<minD)) {
+                    minD = d;
                     maxF = foodCurrent[x][y];
                     dirX = i < 0 ? -1 : (i > 0 ? 1 : 0);
                     dirY = j < 0 ? -1 : (j > 0 ? 1 : 0);
