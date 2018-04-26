@@ -28,6 +28,7 @@ protected:
     int age = 0;
     int agelimit = 1000;
     int vision = 10;
+    Food* food;
 public:
 
     void operator=(const Boid &b) {
@@ -43,15 +44,15 @@ public:
         vision = b.vision;
     }
 
-    Boid(const double &x = 0, const double &y = 0, const double &vx = 0, const double &vy = 0)
-    : x(x), y(y), vx(vx), vy(vy), id(ID_COUNT++) {
+    Boid(Food* f, const double &x = 0, const double &y = 0)
+    : x(x), y(y), vx(0), vy(0), id(ID_COUNT++), food(f) {
     }
 
     void update(const std::vector<Boid> &boids, const Animal &animal, const double &vmax = .005) {
         std::pair<double, double> c = cohesion(boids);
         std::pair<double, double> s = separation(boids);
         std::pair<double, double> a = alignment(boids);
-        std::pair<double, double> f = food();
+        std::pair<double, double> f = foodMove();
 
         vx += c.first + s.first + a.first + f.first;
         vy += c.second + s.second + a.second + f.second;
@@ -76,19 +77,17 @@ public:
 private:
 
     void eatFood() {
-        int xgrid = (x + 1) / 2 * n_food_sites;
-        int ygrid = (y + 1) / 2 * n_food_sites;
-
+        int xgrid = (x + 1) / 2 * food->n_food_sites;
+        int ygrid = (y + 1) / 2 * food->n_food_sites;
 
         for (int i = -2; i <= 2; i++) {
             for (int j = -2; j <= 2; j++) {
-                int x = (xgrid + i) % n_food_sites;
-                int y = (ygrid + j) % n_food_sites;
-                if (foodCurrent[x][y] > 0) {
-                    foodStock += foodCurrent[x][y];
-                    foodCurrent[x][y] = -300;
+                int x = positive_modulo(xgrid + i, food->n_food_sites);
+                int y = positive_modulo(ygrid + j, food->n_food_sites);
+                if (food->getCurrent(x, y) > 0) {
+                    foodStock += food->getCurrent(x, y);
+                    food->consume(x, y);
                 }
-
             }
         }
     }
@@ -144,19 +143,18 @@ private:
         return std::make_pair((sx - vx) / 8, (sy - vy) / 8);
     }
 
-    std::pair<double, double> food() const {
-        int xgrid = (x + 1) / 2 * n_food_sites;
-        int ygrid = (y + 1) / 2 * n_food_sites;
-
+    std::pair<double, double> foodMove() const {
+        int xgrid = (x + 1) / 2 * food->n_food_sites;
+        int ygrid = (y + 1) / 2 * food->n_food_sites;
         int maxF = -1, dirX = 0, dirY = 0, minD = 0;
         for (int i = -vision; i <= vision; i++) {
             for (int j = -vision; j <= vision; j++) {
-                int x = (xgrid + i) % n_food_sites;
-                int y = (ygrid + j) % n_food_sites;
-                int d = squaredTorusDistance(n_food_sites, xgrid, ygrid, x, y);
-                if (foodCurrent[x][y] > maxF || (foodCurrent[x][y] == maxF && d<minD)) {
+                int x = positive_modulo(xgrid + i, food->n_food_sites);
+                int y = positive_modulo(ygrid + j, food->n_food_sites);
+                int d = squaredTorusDistance(food->n_food_sites, xgrid, ygrid, x, y);
+                if (food->getCurrent(x, y) > maxF || (food->getCurrent(x, y) == maxF && d < minD)) {
                     minD = d;
-                    maxF = foodCurrent[x][y];
+                    maxF = food->getCurrent(x, y);
                     dirX = i < 0 ? -1 : (i > 0 ? 1 : 0);
                     dirY = j < 0 ? -1 : (j > 0 ? 1 : 0);
                 }
