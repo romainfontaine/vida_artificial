@@ -142,6 +142,114 @@ unsigned int food_sites[][4] = {
     {80, 35, 4, 5000},
 };
 
+void texture(unsigned char* texDat, unsigned int tw, unsigned int th,
+        double x = 0, double y = 0, double w = 1, double h = 1)
+{
+    // Source: https://stackoverflow.com/a/24266568/4384857
+    //upload to GPU texture
+    GLuint tex;
+    glGenTextures(1, &tex);
+    glBindTexture(GL_TEXTURE_2D, tex);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tw, th, 0, GL_RGB, GL_UNSIGNED_BYTE, texDat);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    //clear and draw quad with texture (could be in display callback)
+    glBindTexture(GL_TEXTURE_2D, tex);
+    glEnable(GL_TEXTURE_2D);
+    glBegin(GL_QUADS);
+    glTexCoord2i(0, 0);
+    glVertex2f(x, y);
+    glTexCoord2i(0, 1);
+    glVertex2f(x, y + h);
+    glTexCoord2i(1, 1);
+    glVertex2f(x + w, y + h);
+    glTexCoord2i(1, 0);
+    glVertex2f(x + w, y);
+    glEnd();
+    glDisable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+const int size = 64;
+float u[2][size][size] = {};
+float v[2][size][size] = {};
+
+void initReact()
+{
+    std::random_device r;
+    std::mt19937 g(r());
+    std::uniform_real_distribution<> d(0., 1.);
+    for (int i = 0; i < size; i++)
+    {
+        for (int j = 0; j < size; j++)
+        {
+            u[0][i][j] = 1;
+            //if (i > 20 && i < 30 && j > 20 && j < 30)
+            //    v[0][i][j] = 1;
+        }
+    }
+
+
+    std::normal_distribution<double> distribution(0, 15);
+    std::uniform_int_distribution<> integ(0, size);
+    for (int l = 0; l < 1; l++)
+    {
+        int x = integ(g), y = integ(g);
+        std::cout << x << " " << y << std::endl;
+        for (int k = 0; k < 1000; k++)
+        {
+            int nx = x + (int) distribution(g), ny = y + (int) distribution(g);
+            if (nx < 0 || nx >= size || ny < 0 || ny >= size)
+                continue;
+            v[0][nx][ny] = d(g); //1;
+        }
+
+    }
+    /*std::uniform_int_distribution<> i(size, size);
+    for(int k = 0; k<10;k++){
+        v[0][i(g)][i(g)]=1;
+    }*/
+
+}
+int current = 0;
+
+inline float laplacian(const int &i, const int &j, float m[size][size])
+{
+    return -1 * m[i][j] +
+            // Horizontal & vertical
+            .2 * (m[(i + 1) % size][j] +
+            m[(i - 1 + size) % size][j] +
+            m[i][(j + 1) % size] +
+            m[i][(j - 1 + size) % size]) +
+            // Diagonals
+            .05 * (m[(i + 1) % size][(j + 1) % size] +
+            m[(i - 1 + size) % size][(j + 1) % size] +
+            m[(i - 1 + size) % size][(j - 1 + size) % size] +
+            m[(i + 1) % size][(j - 1) % size]);
+}
+
+void iterate(const float &t = 1)
+{
+    current = 1 - current;
+    float Du = 0.2097, Dv = .105, F = 0.021, k = 0.06;
+
+    for (int i = 0; i < size; i++)
+    {
+        for (int j = 0; j < size; j++)
+        {
+            int other = 1 - current;
+
+            float du = Du * laplacian(i, j, u[other]) * u[other][i][j] - u[other][i][j] * v[other][i][j] * v[other][i][j] + F * (1 - u[other][i][j]);
+            float dv = Dv * laplacian(i, j, v[other]) * v[other][i][j] + u[other][i][j] * v[other][i][j] * v[other][i][j]-(F + k) * v[other][i][j];
+
+            u[current][i][j] = std::max(0.f, u[other][i][j] + du * t);
+            v[current][i][j] = std::max(0.f, v[other][i][j] + dv * t);
+        }
+    }
+}
+
 void renderFunction()
 {
     a1.setScaleX(xs[i]);
@@ -169,7 +277,7 @@ void renderFunction()
         preys[i].update(preys);
         if (!preys[i].consumeEnergy())
         {
-            std::cout<<preys[i]<<std::endl;
+            std::cout << preys[i] << std::endl;
             preys.erase(preys.begin() + i);
         }
         preys[i].draw();
@@ -178,17 +286,36 @@ void renderFunction()
 
     food.Draw();
 
+    glColor3f(1.0, 1.0, 1.0);
+    for (int i = 0; i < 2; i++)
+        iterate();
+
+    unsigned char texDat[size * size * 3];
+    for (int i = 0; i < size * size * 3; i += 3)
+    {
+        texDat[i] = u[current][i / 3 / size][(i / 3) % size]*255;
+        texDat[i + 1] = u[current][i / 3 / size][(i / 3) % size]*255;
+        texDat[i + 2] = 0;
+    }
+
+    texture(texDat, size, size, -.5, -.5, 1, 1);
+
+
     glFlush();
 }
 
 void timer(int)
 {
+
     glutPostRedisplay();
     glutTimerFunc(1000 / 30, timer, 0);
 }
 
 int main(int argc, char** argv)
 {
+    initReact();
+
+
     for (double x = mini; x < maxi; x += step)
     {
         for (double y = mini; y < maxi; y += step)
@@ -215,8 +342,8 @@ int main(int argc, char** argv)
 
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_SINGLE);
-    glutInitWindowSize(1500, 900);
-    glutInitWindowPosition(100, 100);
+    glutInitWindowSize(1920, 1080);
+    glutInitWindowPosition(0, 0);
     glutCreateWindow("ALife");
     glutDisplayFunc(renderFunction);
     glEnable(GL_BLEND); // Enable transparency
