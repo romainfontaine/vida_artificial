@@ -101,7 +101,7 @@ std::vector<Point> fish2{
     {0.0, 0.2055837563, 1}
 };
 
-const double mini = .1, maxi = .2, step = .01;
+const double mini = .07, maxi = .15, step = .01;
 
 std::vector<double> ps;
 std::vector<double> xs;
@@ -131,7 +131,7 @@ Animal a1(fish1, mini, mini);
 Animal a2(fish2, mini, mini);
 
 #include "Food.h"
-Food* food = new Food(100);
+Food food(100);
 #include "Boid.h"
 std::vector<Boid> preys;
 
@@ -166,15 +166,17 @@ void renderFunction()
 
     for (unsigned int i = 0; i < preys.size(); i++)
     {
-        preys[i].update(preys, a2);
+        preys[i].update(preys);
         if (!preys[i].consumeEnergy())
         {
+            std::cout<<preys[i]<<std::endl;
             preys.erase(preys.begin() + i);
         }
+        preys[i].draw();
     }
-    food->regenerateFood();
+    food.regenerateFood();
 
-    food->Draw();
+    food.Draw();
 
     glFlush();
 }
@@ -187,9 +189,9 @@ void timer(int)
 
 int main(int argc, char** argv)
 {
-    for (double x = mini; x < maxi; x += step * 15)
+    for (double x = mini; x < maxi; x += step)
     {
-        for (double y = mini; y < maxi; y += step * 15)
+        for (double y = mini; y < maxi; y += step)
         {
             for (double p = -.15; p <= .15; p += .0075)
             {
@@ -200,14 +202,15 @@ int main(int argc, char** argv)
         }
     }
 
-    food->generateFood(food_sites, sizeof (food_sites) / sizeof (int) / 4);
+    food.generateFood(food_sites, sizeof (food_sites) / sizeof (int) / 4);
     std::random_device rd;
     std::default_random_engine re(rd());
 
     std::uniform_real_distribution<double> unif(-1, 1);
     for (int i = 0; i < 10; i++)
     {
-        preys.push_back(Boid(food, unif(re), unif(re)));
+        preys.push_back(Boid::individual(&food, &a2));
+        preys.back().setPosition(unif(re), unif(re));
     }
 
     glutInit(&argc, argv);
@@ -220,6 +223,5 @@ int main(int argc, char** argv)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     timer(0);
     glutMainLoop();
-    delete food;
     return 0;
 }

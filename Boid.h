@@ -21,14 +21,10 @@ class Boid {
     static int ID_COUNT;
     const double SQUARED_DIST_SEPARATION = 0.025;
 protected:
-    double x, y, vx, vy;
-    int id;
-    int foodStock = 100;
-    int metabolism = 1;
-    int age = 0;
-    int agelimit = 1000;
-    int vision = 10;
+    double x, y, vx, vy, vmax, xscale, yscale, perspective;
+    int id, foodStock, metabolism, age, agelimit, vision;
     Food* food;
+    Animal* animal;
 public:
 
     void operator=(const Boid &b) {
@@ -36,19 +32,59 @@ public:
         y = b.y;
         vx = b.vx;
         vy = b.vy;
+        vmax = b.vmax;
+        xscale = b.xscale;
+        yscale = b.yscale;
+        perspective = b.perspective;
         id = b.id;
         foodStock = b.foodStock;
         metabolism = b.metabolism;
         age = b.age;
         agelimit = b.agelimit;
         vision = b.vision;
+        food = food;
+        animal = animal;
     }
 
-    Boid(Food* f, const double &x = 0, const double &y = 0)
-    : x(x), y(y), vx(0), vy(0), id(ID_COUNT++), food(f) {
+    Boid(Food* f, Animal* a, const double &x = 0, const double &y = 0,
+            const int &foodStock = 200, const int &metabolism = 1,
+            const int &agelimit = 1000, const int &vision = 10, const double &vmax = .005,
+            const double &xscale = .15, const double&yscale = .15, const double &perspective = 0.)
+    : x(x), y(y), vx(0), vy(0), vmax(vmax), xscale(xscale), yscale(yscale),
+    perspective(perspective), id(ID_COUNT++), foodStock(foodStock),
+    metabolism(metabolism), age(0), agelimit(agelimit), vision(vision), food(f), animal(a) {
     }
 
-    void update(const std::vector<Boid> &boids, const Animal &animal, const double &vmax = .005) {
+    friend std::ostream& operator<<(std::ostream& s, const Boid& b) {
+        return s << "Boid #" << b.id << " | pos={" << b.x << "," << b.y << 
+                "} vmax=" << b.vmax << " xscale=" << b.xscale << " yscale=" <<
+                b.yscale << " perspective=" << b.perspective << " id=" << b.id <<
+                " foodStock=" << b.foodStock << " metabolism=" << b.metabolism <<
+                " age=" << b.age << " agelimit=" << b.agelimit << " vision=" <<
+                b.vision;
+    }
+
+    static Boid individual(Food* f, Animal* a) {
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<> dis_meta(1, 3);
+        std::normal_distribution<> dis_age(1000, 100);
+        std::uniform_int_distribution<> dis_vision(5, 15);
+        std::uniform_real_distribution<> dis_speed(.001, .006);
+        std::uniform_real_distribution<> dis_scale(.075, .12);
+        std::uniform_real_distribution<> dis_persp(-.15, .15);
+
+        return Boid(f, a, 0, 0, 200, dis_meta(gen), dis_age(gen),
+                dis_vision(gen), dis_speed(gen), dis_scale(gen),
+                dis_scale(gen), dis_persp(gen));
+    }
+
+    void setPosition(const double &x, const double &y) {
+        this->x = x;
+        this->y = y;
+    }
+
+    void update(const std::vector<Boid> &boids) {
         std::pair<double, double> c = cohesion(boids);
         std::pair<double, double> s = separation(boids);
         std::pair<double, double> a = alignment(boids);
@@ -66,8 +102,14 @@ public:
         if (y<-1 || y > 1) {
             y = fmod(y + 3, 2) - 1;
         }
-        animal.Draw(x, y);
         eatFood();
+    }
+
+    void draw() {
+        animal->setPerspective(perspective);
+        animal->setScaleX(xscale);
+        animal->setScaleY(yscale);
+        animal->Draw(x, y);
     }
 
     bool consumeEnergy() {
