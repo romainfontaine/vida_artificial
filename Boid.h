@@ -1,62 +1,22 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/* 
- * File:   Boid.h
- * Author: romain
- *
- * Created on April 20, 2018, 11:36 AM
- */
-
 #ifndef BOID_H
 #define BOID_H
 
-#include "Animal.h"
-
-class Boid {
+class Boid : public Animal {
     // Source for basic boid rules: http://www.kfish.org/boids/pseudocode.html
     static int ID_COUNT;
-    const double SQUARED_DIST_SEPARATION = 0.025;
+    static const double SQUARED_DIST_SEPARATION;
 protected:
-    double x, y, vx, vy, vmax, xscale, yscale, perspective;
-    int id, foodStock, metabolism, age, agelimit, vision;
+    int id, vision;
     Food* food;
-    Animal* animal;
 public:
 
-    void operator=(const Boid &b) {
-        x = b.x;
-        y = b.y;
-        vx = b.vx;
-        vy = b.vy;
-        vmax = b.vmax;
-        xscale = b.xscale;
-        yscale = b.yscale;
-        perspective = b.perspective;
-        id = b.id;
-        foodStock = b.foodStock;
-        metabolism = b.metabolism;
-        age = b.age;
-        agelimit = b.agelimit;
-        vision = b.vision;
-        food = food;
-        animal = animal;
-    }
-
-    Boid(Food* f, Animal* a, const double &x = 0, const double &y = 0,
-            const int &foodStock = 200, const int &metabolism = 1,
-            const int &agelimit = 1000, const int &vision = 10, const double &vmax = .005,
-            const double &xscale = .15, const double&yscale = .15, const double &perspective = 0.)
-    : x(x), y(y), vx(0), vy(0), vmax(vmax), xscale(xscale), yscale(yscale),
-    perspective(perspective), id(ID_COUNT++), foodStock(foodStock),
-    metabolism(metabolism), age(0), agelimit(agelimit), vision(vision), food(f), animal(a) {
+    Boid(Food* f, const Animal &an, const int &vision = 10)
+    : Animal(an),
+    id(ID_COUNT++), vision(vision), food(f) {
     }
 
     friend std::ostream& operator<<(std::ostream& s, const Boid& b) {
-        return s << "Boid #" << b.id << " | pos={" << b.x << "," << b.y << 
+        return s << "Boid #" << b.id << " | pos={" << b.x << "," << b.y <<
                 "} vmax=" << b.vmax << " xscale=" << b.xscale << " yscale=" <<
                 b.yscale << " perspective=" << b.perspective << " id=" << b.id <<
                 " foodStock=" << b.foodStock << " metabolism=" << b.metabolism <<
@@ -64,7 +24,7 @@ public:
                 b.vision;
     }
 
-    static Boid individual(Food* f, Animal* a) {
+    static Boid individual(Food* f, const std::vector<Point> *shape) {
         std::random_device rd;
         std::mt19937 gen(rd());
         std::uniform_int_distribution<> dis_meta(1, 3);
@@ -74,14 +34,10 @@ public:
         std::uniform_real_distribution<> dis_scale(.075, .12);
         std::uniform_real_distribution<> dis_persp(-.15, .15);
 
-        return Boid(f, a, 0, 0, 200, dis_meta(gen), dis_age(gen),
-                dis_vision(gen), dis_speed(gen), dis_scale(gen),
-                dis_scale(gen), dis_persp(gen));
-    }
 
-    void setPosition(const double &x, const double &y) {
-        this->x = x;
-        this->y = y;
+        Animal an(shape, 0, 0, 200, dis_meta(gen), dis_age(gen), dis_speed(gen), dis_scale(gen),
+                dis_scale(gen), dis_persp(gen));
+        return Boid(f, an, dis_vision(gen));
     }
 
     void update(const std::vector<Boid> &boids) {
@@ -105,13 +61,6 @@ public:
         eatFood();
     }
 
-    void draw() {
-        animal->setPerspective(perspective);
-        animal->setScaleX(xscale);
-        animal->setScaleY(yscale);
-        animal->Draw(x, y);
-    }
-
     bool consumeEnergy() {
         return ((foodStock -= metabolism) > 0) && (age++<agelimit);
     }
@@ -121,9 +70,9 @@ private:
     void eatFood() {
         int xgrid = (x + 1) / 2 * food->n_food_sites;
         int ygrid = (y + 1) / 2 * food->n_food_sites;
-
-        for (int i = -2; i <= 2; i++) {
-            for (int j = -2; j <= 2; j++) {
+        const int food_radius = 3;
+        for (int i = -food_radius; i <= food_radius; i++) {
+            for (int j = -food_radius; j <= food_radius; j++) {
                 int x = positive_modulo(xgrid + i, food->n_food_sites);
                 int y = positive_modulo(ygrid + j, food->n_food_sites);
                 if (food->getCurrent(x, y) > 0) {
@@ -132,17 +81,6 @@ private:
                 }
             }
         }
-    }
-
-    double squaredTorusDistance(const Boid &b) const {
-        return squaredTorusDistance(2, x, y, b.x, b.y);
-    }
-
-    static double squaredTorusDistance(const double &size, const double &fx, const double &fy, const double &nx, const double &ny) {
-        // Source: https://stackoverflow.com/q/2123947/4384857
-        double a = std::min(std::abs(fx - nx), size - std::abs(fx - nx));
-        double x = std::min(std::abs(fy - ny), size - std::abs(fy - ny));
-        return a * a + x * x;
     }
 
     std::pair<double, double> cohesion(const std::vector<Boid> &boids) const {
@@ -208,12 +146,13 @@ private:
             double norm = sqrt((dirX * dirX) + (dirY * dirY));
             double dx = (double) dirX / norm;
             double dy = (double) dirY / norm;
-            const double food_fact = .1;
+            const double food_fact = .07;
             return std::make_pair(dx*food_fact, dy * food_fact);
         }
     }
 };
 int Boid::ID_COUNT = 0;
+const double Boid::SQUARED_DIST_SEPARATION = 0.015;
 
 #endif /* BOID_H */
 

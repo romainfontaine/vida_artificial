@@ -15,11 +15,36 @@
 #define FOOD_H
 
 class Food {
+public:
+    const int n_food_sites;
+private:
     int maxCapacity = 250;
     int** foodCapacity;
     int** foodCurrent;
+
+    void setFullCapacity() {
+        for (int i = 0; i < n_food_sites; i++) {
+            for (int j = 0; j < n_food_sites; j++) {
+                foodCurrent[i][j] = foodCapacity[i][j];
+            }
+        }
+    }
+
+    void addSand(const int &x, const int &y) {
+
+        if (x < 0 || y < 0 || x >= n_food_sites || y >= n_food_sites)
+            return;
+        foodCapacity[x][y]++;
+        if (foodCapacity[x][y] >= 4) {
+            foodCapacity[x][y] = 0;
+            addSand(x + 1, y);
+            addSand(x - 1, y);
+            addSand(x, y + 1);
+            addSand(x, y - 1);
+        }
+    }
+
 public:
-    const int n_food_sites;
 
     int getCurrent(const int &x, const int &y) const {
         return foodCurrent[x][y];
@@ -55,48 +80,6 @@ public:
         delete[] foodCurrent;
     }
 
-    void setFullCapacity() {
-        for (int i = 0; i < n_food_sites; i++) {
-            for (int j = 0; j < n_food_sites; j++) {
-                foodCurrent[i][j] = foodCapacity[i][j];
-            }
-        }
-    }
-
-    void generateFoodNormal(unsigned int food_sites[][4], unsigned int n) {
-
-        std::random_device rd{};
-        std::mt19937 gen{rd()};
-
-        for (unsigned int k = 0; k < n; k++) {
-            std::normal_distribution<> d{0, (double) food_sites[k][2]};
-
-            for (unsigned int i = 0; i < food_sites[k][3]; i++) {
-                int x = (int) round(d(gen)), y = (int) round(d(gen));
-                x += food_sites[k][0] + n_food_sites;
-                y += food_sites[k][1] + n_food_sites;
-                x %= n_food_sites;
-                y %= n_food_sites;
-                foodCapacity[x][y] += 4;
-            }
-            setFullCapacity();
-        }
-    }
-
-    void addSand(const int &x, const int &y) {
-
-        if (x < 0 || y < 0 || x >= n_food_sites || y >= n_food_sites)
-            return;
-        foodCapacity[x][y]++;
-        if (foodCapacity[x][y] >= 4) {
-            foodCapacity[x][y] = 0;
-            addSand(x + 1, y);
-            addSand(x - 1, y);
-            addSand(x, y + 1);
-            addSand(x, y - 1);
-        }
-    }
-
     void generateFoodSandpile(unsigned int food_sites[][3], unsigned int n) {
         for (unsigned int k = 0; k < n; k++) {
             for (unsigned int l = 0; l < food_sites[k][2]; l++) {
@@ -105,7 +88,7 @@ public:
         }
         for (int i = 0; i < n_food_sites; i++) {
             for (int j = 0; j < n_food_sites; j++) {
-                foodCapacity[i][j]*=maxCapacity/4;
+                foodCapacity[i][j] *= maxCapacity / 4;
             }
         }
         setFullCapacity();
@@ -128,7 +111,7 @@ public:
                 if (foodCurrent[i][j] < 1) {
                     continue;
                 }
-                glColor4d(46. / 255, 204. / 255, 113. / 255, .5 + ((double) foodCurrent[i][j]) / maxCapacity / 2);
+                glColor4d(46. / 255, 204. / 255, 113. / 255, .3 + ((double) foodCurrent[i][j]) / maxCapacity / 3. * 2.);
                 glBegin(GL_TRIANGLES);
 
                 glVertex2d(x + food_site_size / 6, y + food_site_size / 6);

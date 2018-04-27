@@ -2,39 +2,52 @@
 #define ANIMAL_H
 
 class Animal {
-private:
-    std::vector<Point> shape;
-    double scaleX, scaleY, perspectiveRatio;
+protected:
+    const std::vector<Point> *shape;
+    double x, y, vx, vy, vmax, xscale, yscale, perspective;
+    int foodStock, metabolism, age, agelimit;
 public:
 
-    Animal(const std::vector<Point> &shape, const double &scaleX = 1, const double &scaleY = 1, const double &perspectiveRatio = 0) :
-    shape(shape), scaleX(scaleX), scaleY(scaleY), perspectiveRatio(perspectiveRatio) {
+    Animal(const std::vector<Point> *shape, const double &x = 0, const double &y = 0,
+            const int &foodStock = 200, const int &metabolism = 1,
+            const int &agelimit = 1000, const double &vmax = .005,
+            const double &xscale = .15, const double&yscale = .15, const double &perspective = 0.)
+    : shape(shape), x(x), y(y), vx(0), vy(0), vmax(vmax), xscale(xscale), yscale(yscale),
+    perspective(perspective), foodStock(foodStock), metabolism(metabolism), age(0), agelimit(agelimit) {
 
     }
+protected:
 
-    void setPerspective(const double &v) {
-        this->perspectiveRatio = v;
+    double squaredTorusDistance(const Animal &a) const {
+        return squaredTorusDistance(2, x, y, a.x, a.y);
     }
 
-    void setScaleX(const double &scaleX) {
-        this->scaleX = scaleX;
+    static double squaredTorusDistance(const double &size, const double &fx, const double &fy, const double &nx, const double &ny) {
+        // Source: https://stackoverflow.com/q/2123947/4384857
+        double a = std::min(std::abs(fx - nx), size - std::abs(fx - nx));
+        double x = std::min(std::abs(fy - ny), size - std::abs(fy - ny));
+        return a * a + x * x;
+    }
+public:
+
+    void setPosition(const double &x, const double &y) {
+        this->x = x;
+        this->y = y;
     }
 
-    void setScaleY(const double &scaleY) {
-        this->scaleY = scaleY;
+    std::pair<double, double> getPosition() const {
+        return std::make_pair(x, y);
     }
 
-    void Draw(double x = 0, double y = 0) const {
-        x -= 0.5 * scaleX; // Center
+    void draw() const {
+        const double x = this->x - 0.5 * xscale; // Center
         glColor3d(1., 1., 1.);
         glBegin(GL_LINE_LOOP);
-        for (const Point &p : shape) {
-            glVertex3d(x + p.x * scaleX, y + (p.y + sign(p.y)*(exp(p.x * perspectiveRatio) - 1)) * scaleY, p.z);
-
-
-        }
+        for (const Point &p : *shape)
+            glVertex3d(x + p.x * xscale, y + (p.y + sign(p.y)*(exp(p.x * perspective) - 1)) * yscale, p.z);
         glEnd();
     }
+private:
 
     static double sign(double d) {
         if (d > .05)

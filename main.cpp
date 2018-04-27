@@ -30,11 +30,10 @@ inline int positive_modulo(int i, int n)
 
 #include "TurtleInterpreter.h"
 #include "LSystem.h"
-#include "Animal.h"
 #include "Plant.h"
 
 
-std::vector<Point> fish1{
+static std::vector<Point> fish1{
     {0.0625, -0.0692307692, 1},
     {0.0, 0.1846153846, 1},
     {0.125, 0.1461538462, 1},
@@ -58,7 +57,7 @@ std::vector<Point> fish1{
     {0.0625, -0.1076923077, 1}
 };
 
-std::vector<Point> fish2{
+static std::vector<Point> fish2{
     {0.0, 0.2055837563, 1},
     {0.12862318839999998, 0.0837563452, 1},
     {0.45108695649999997, 0.2664974619, 1},
@@ -101,39 +100,31 @@ std::vector<Point> fish2{
     {0.0, 0.2055837563, 1}
 };
 
-const double mini = .07, maxi = .15, step = .01;
-
-std::vector<double> ps;
-std::vector<double> xs;
-std::vector<double> ys;
-int i = 0;
-
-
-
-Plant p1(Turtle(.0035, 20, -.5, -1, 1.5, .05), LSystem('X',{
+static Plant p1(Turtle(.0035, 20, -.5, -1, 1.5, .05), LSystem('X',{
     {'F',
         {"FF"}},
     {'X',
         {"F[+X]F[-X]+X"}}
 }), 7, Color(43. / 255, 112. / 255, 46. / 255));
 
-Plant p2(Turtle(.02, 20, .5, -1, .3, .1), LSystem('F',{
+static Plant p2(Turtle(.02, 20, .5, -1, .3, .1), LSystem('F',{
     {'F',
         {"FF-[-F+F+F]+[+F-F-F]"}}
 }), 4, Color(43. / 255, 112. / 255, 46. / 255));
 
 
-Plant p3(Turtle(.02, 20, 0, -1, 1, .1), LSystem('F',{
+static Plant p3(Turtle(.02, 20, 0, -1, 1, .1), LSystem('F',{
     {'F',
         {"F[+F]F[-F]F", "F[+F]F", "F[-F]F"}}
 }), 5, Color(96. / 255, 140. / 255, 93. / 255));
-Animal a1(fish1, mini, mini);
-Animal a2(fish2, mini, mini);
 
 #include "Food.h"
-Food food(100);
+static Food food(100);
+#include "Animal.h"
 #include "Boid.h"
-std::vector<Boid> preys;
+#include "Predator.h"
+static std::vector<Boid> preys;
+static std::vector<Predator> predators;
 
 void texture(unsigned char* texDat, unsigned int tw, unsigned int th,
         double x = 0, double y = 0, double w = 1, double h = 1)
@@ -165,9 +156,9 @@ void texture(unsigned char* texDat, unsigned int tw, unsigned int th,
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-const int size = 64;
-float u[2][size][size] = {};
-float v[2][size][size] = {};
+static const int size = 64;
+static float u[2][size][size] = {};
+static float v[2][size][size] = {};
 
 void initReact()
 {
@@ -206,7 +197,7 @@ void initReact()
     }*/
 
 }
-int current = 0;
+static int current = 0;
 
 inline float laplacian(const int &i, const int &j, float m[size][size])
 {
@@ -245,14 +236,6 @@ void iterate(const float &t = 1)
 
 void renderFunction()
 {
-    a1.setScaleX(xs[i]);
-    a1.setScaleY(ys[i]);
-    a1.setPerspective(ps[i]);
-    a2.setScaleX(xs[i]);
-    a2.setScaleY(ys[i]);
-    a2.setPerspective(ps[i]);
-    i++;
-    i %= xs.size();
 
     glClearColor(0.0, 0.0, 0.0, 0.0);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -263,17 +246,24 @@ void renderFunction()
     p2.Draw();
     p3.Draw();
 
-    a1.Draw(.5, .5);
-
+    std::random_device rd;
+    std::default_random_engine re(rd());
+    std::uniform_real_distribution<double> unif(-1, 1);
     for (unsigned int i = 0; i < preys.size(); i++)
     {
         preys[i].update(preys);
         if (!preys[i].consumeEnergy())
         {
             std::cout << preys[i] << std::endl;
-            preys.erase(preys.begin() + i);
+            preys[i] = Boid::individual(&food, &fish2);
+            preys[i].setPosition(unif(re), unif(re));
         }
         preys[i].draw();
+    }
+    for (unsigned int i = 0; i < predators.size(); i++)
+    {
+        predators[i].update(preys);
+        predators[i].draw();
     }
     food.regenerateFood();
 
@@ -291,7 +281,7 @@ void renderFunction()
         texDat[i + 2] = 0;
     }
 
-    texture(texDat, size, size, -.5, -.5, 1, 1);
+    texture(texDat, size, size, -5, -5, 1, 1);
 
 
     glFlush();
@@ -299,7 +289,6 @@ void renderFunction()
 
 void timer(int)
 {
-
     glutPostRedisplay();
     glutTimerFunc(1000 / 30, timer, 0);
 }
@@ -308,31 +297,6 @@ int main(int argc, char** argv)
 {
     initReact();
 
-
-    for (double x = mini; x < maxi; x += step)
-    {
-        for (double y = mini; y < maxi; y += step)
-        {
-            for (double p = -.15; p <= .15; p += .0075)
-            {
-                ps.push_back(p);
-                xs.push_back(x);
-                ys.push_back(y);
-            }
-        }
-    }
-
-    // X, Y, STD, QTY
-    /*
-    unsigned int food_sites[][4] = {
-        {25, 15, 3, 5000},
-        {50, 50, 5, 20000},
-        {80, 35, 4, 5000},
-    };
-
-
-    food.generateFoodNormal(food_sites, sizeof (food_sites) / sizeof (int) / 4);
-    */
     // X, Y, QTY
     unsigned int food_sites_sp[][3] = {
         {25, 15, 1000},
@@ -346,10 +310,14 @@ int main(int argc, char** argv)
     std::default_random_engine re(rd());
 
     std::uniform_real_distribution<double> unif(-1, 1);
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 20; i++)
     {
-        preys.push_back(Boid::individual(&food, &a2));
+        preys.push_back(Boid::individual(&food, &fish2));
         preys.back().setPosition(unif(re), unif(re));
+    }
+    for (int i = 0; i < 5; i++)
+    {
+        predators.push_back(Predator(Animal(&fish1)));
     }
 
     glutInit(&argc, argv);
