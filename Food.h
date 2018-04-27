@@ -28,6 +28,7 @@ public:
     int getCapacity(const int &x, const int &y) const {
         return foodCapacity[x][y];
     }
+
     void consume(const int &x, const int &y) {
         foodCurrent[x][y] = -300;
     }
@@ -54,7 +55,15 @@ public:
         delete[] foodCurrent;
     }
 
-    void generateFood(unsigned int food_sites[][4], unsigned int n) {
+    void setFullCapacity() {
+        for (int i = 0; i < n_food_sites; i++) {
+            for (int j = 0; j < n_food_sites; j++) {
+                foodCurrent[i][j] = foodCapacity[i][j];
+            }
+        }
+    }
+
+    void generateFoodNormal(unsigned int food_sites[][4], unsigned int n) {
 
         std::random_device rd{};
         std::mt19937 gen{rd()};
@@ -70,12 +79,36 @@ public:
                 y %= n_food_sites;
                 foodCapacity[x][y] += 4;
             }
-            for (int i = 0; i < n_food_sites; i++) {
-                for (int j = 0; j < n_food_sites; j++) {
-                    foodCurrent[i][j] = foodCapacity[i][j];
-                }
+            setFullCapacity();
+        }
+    }
+
+    void addSand(const int &x, const int &y) {
+
+        if (x < 0 || y < 0 || x >= n_food_sites || y >= n_food_sites)
+            return;
+        foodCapacity[x][y]++;
+        if (foodCapacity[x][y] >= 4) {
+            foodCapacity[x][y] = 0;
+            addSand(x + 1, y);
+            addSand(x - 1, y);
+            addSand(x, y + 1);
+            addSand(x, y - 1);
+        }
+    }
+
+    void generateFoodSandpile(unsigned int food_sites[][3], unsigned int n) {
+        for (unsigned int k = 0; k < n; k++) {
+            for (unsigned int l = 0; l < food_sites[k][2]; l++) {
+                addSand(food_sites[k][0], food_sites[k][1]);
             }
         }
+        for (int i = 0; i < n_food_sites; i++) {
+            for (int j = 0; j < n_food_sites; j++) {
+                foodCapacity[i][j]*=maxCapacity/4;
+            }
+        }
+        setFullCapacity();
     }
 
     void regenerateFood() {

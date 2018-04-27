@@ -135,13 +135,6 @@ Food food(100);
 #include "Boid.h"
 std::vector<Boid> preys;
 
-// X, Y, STD, QTY
-unsigned int food_sites[][4] = {
-    {25, 15, 3, 5000},
-    {50, 50, 5, 20000},
-    {80, 35, 4, 5000},
-};
-
 void texture(unsigned char* texDat, unsigned int tw, unsigned int th,
         double x = 0, double y = 0, double w = 1, double h = 1)
 {
@@ -329,7 +322,26 @@ int main(int argc, char** argv)
         }
     }
 
-    food.generateFood(food_sites, sizeof (food_sites) / sizeof (int) / 4);
+    // X, Y, STD, QTY
+    /*
+    unsigned int food_sites[][4] = {
+        {25, 15, 3, 5000},
+        {50, 50, 5, 20000},
+        {80, 35, 4, 5000},
+    };
+
+
+    food.generateFoodNormal(food_sites, sizeof (food_sites) / sizeof (int) / 4);
+    */
+    // X, Y, QTY
+    unsigned int food_sites_sp[][3] = {
+        {25, 15, 1000},
+        {50, 50, 2000},
+        {80, 35, 1000},
+    };
+    food.generateFoodSandpile(food_sites_sp, sizeof (food_sites_sp) / sizeof (int) / 3);
+
+
     std::random_device rd;
     std::default_random_engine re(rd());
 
