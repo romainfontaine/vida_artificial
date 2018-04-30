@@ -266,7 +266,7 @@ void renderFunction()
         predators[i].eatFood(preys);
         if (!predators[i].consumeEnergy())
         {
-            predators[i] = Predator(Animal(&fish1));
+            predators[i] = Predator::individual(&fish1);
             predators[i].setPosition(unif(re), unif(re));
         }
         predators[i].draw();
@@ -323,7 +323,7 @@ int main(int argc, char** argv)
     }
     for (int i = 0; i < 5; i++)
     {
-        predators.push_back(Predator(Animal(&fish1)));
+        predators.push_back(Predator::individual(&fish1));
         predators.back().setPosition(unif(re), unif(re));
     }
 

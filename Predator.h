@@ -19,6 +19,15 @@ public:
         }
     }
 
+    static Predator individual(const std::vector<Point> *shape) {
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_real_distribution<> dis_vision(.5, .7);
+
+        Animal an = Animal::individual(shape);
+        return Predator(an, dis_vision(gen));
+    }
+
     void update(const std::vector<Boid> &boids) {
         std::pair<double, double> c = moveToFood(boids);
         const double threshold = .0000000001;

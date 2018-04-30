@@ -27,16 +27,9 @@ public:
     static Boid individual(Food* f, const std::vector<Point> *shape) {
         std::random_device rd;
         std::mt19937 gen(rd());
-        std::uniform_int_distribution<> dis_meta(1, 3);
-        std::normal_distribution<> dis_age(1000, 100);
         std::uniform_int_distribution<> dis_vision(5, 15);
-        std::uniform_real_distribution<> dis_speed(.001, .006);
-        std::uniform_real_distribution<> dis_scale(.075, .12);
-        std::uniform_real_distribution<> dis_persp(-.15, .15);
 
-
-        Animal an(shape, 0, 0, 200, dis_meta(gen), dis_age(gen), dis_speed(gen), dis_scale(gen),
-                dis_scale(gen), dis_persp(gen));
+        Animal an = Animal::individual(shape);
         return Boid(f, an, dis_vision(gen));
     }
 
