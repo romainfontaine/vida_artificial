@@ -110,6 +110,9 @@ static Food food(100);
 static std::vector<Boid> preys;
 static std::vector<Predator> predators;
 
+#include "ReactionDiffusion.h"
+ReactionDiffusion react;
+
 void texture(unsigned char* texDat, unsigned int tw, unsigned int th,
         double x = 0, double y = 0, double w = 1, double h = 1)
 {
@@ -138,84 +141,7 @@ void texture(unsigned char* texDat, unsigned int tw, unsigned int th,
     glEnd();
     glDisable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-static const int size = 64;
-static float u[2][size][size] = {};
-static float v[2][size][size] = {};
-
-void initReact()
-{
-    std::random_device r;
-    std::mt19937 g(r());
-    std::uniform_real_distribution<> d(0., 1.);
-    for (int i = 0; i < size; i++)
-    {
-        for (int j = 0; j < size; j++)
-        {
-            u[0][i][j] = 1;
-            //if (i > 20 && i < 30 && j > 20 && j < 30)
-            //    v[0][i][j] = 1;
-        }
-    }
-
-
-    std::normal_distribution<double> distribution(0, 15);
-    std::uniform_int_distribution<> integ(0, size);
-    for (int l = 0; l < 1; l++)
-    {
-        int x = integ(g), y = integ(g);
-        std::cout << x << " " << y << std::endl;
-        for (int k = 0; k < 1000; k++)
-        {
-            int nx = x + (int) distribution(g), ny = y + (int) distribution(g);
-            if (nx < 0 || nx >= size || ny < 0 || ny >= size)
-                continue;
-            v[0][nx][ny] = d(g); //1;
-        }
-
-    }
-    /*std::uniform_int_distribution<> i(size, size);
-    for(int k = 0; k<10;k++){
-        v[0][i(g)][i(g)]=1;
-    }*/
-
-}
-static int current = 0;
-
-inline float laplacian(const int &i, const int &j, float m[size][size])
-{
-    return -1 * m[i][j] +
-            // Horizontal & vertical
-            .2 * (m[(i + 1) % size][j] +
-            m[(i - 1 + size) % size][j] +
-            m[i][(j + 1) % size] +
-            m[i][(j - 1 + size) % size]) +
-            // Diagonals
-            .05 * (m[(i + 1) % size][(j + 1) % size] +
-            m[(i - 1 + size) % size][(j + 1) % size] +
-            m[(i - 1 + size) % size][(j - 1 + size) % size] +
-            m[(i + 1) % size][(j - 1) % size]);
-}
-
-void iterate(const float &t = 1)
-{
-    current = 1 - current;
-    float Du = 0.2097, Dv = .105, F = 0.021, k = 0.06;
-
-    for (int i = 0; i < size; i++)
-    {
-        for (int j = 0; j < size; j++)
-        {
-            int other = 1 - current;
-
-            float du = Du * laplacian(i, j, u[other]) * u[other][i][j] - u[other][i][j] * v[other][i][j] * v[other][i][j] + F * (1 - u[other][i][j]);
-            float dv = Dv * laplacian(i, j, v[other]) * v[other][i][j] + u[other][i][j] * v[other][i][j] * v[other][i][j]-(F + k) * v[other][i][j];
-
-            u[current][i][j] = std::max(0.f, u[other][i][j] + du * t);
-            v[current][i][j] = std::max(0.f, v[other][i][j] + dv * t);
-        }
-    }
+    glDeleteTextures(1, &tex);
 }
 
 void renderFunction()
@@ -260,32 +186,24 @@ void renderFunction()
     food.Draw();
 
     glColor3f(1.0, 1.0, 1.0);
-    for (int i = 0; i < 2; i++)
-        iterate();
+    for (int i = 0; i < 5; i++)
+        react.iterate();
 
-    unsigned char texDat[size * size * 3];
-    for (int i = 0; i < size * size * 3; i += 3)
-    {
-        texDat[i] = u[current][i / 3 / size][(i / 3) % size]*255;
-        texDat[i + 1] = u[current][i / 3 / size][(i / 3) % size]*255;
-        texDat[i + 2] = 0;
-    }
-
-    texture(texDat, size, size, -5, -5, 1, 1);
-
+    texture(react.toUCharArray(), react.getSize(), react.getSize(), -.5, -.5, 1, 1);
 
     glFlush();
 }
 
 void timer(int)
 {
+
     glutPostRedisplay();
     glutTimerFunc(1000 / 30, timer, 0);
 }
 
 int main(int argc, char** argv)
 {
-    initReact();
+    react.initReact();
 
     // X, Y, QTY
     unsigned int food_sites_sp[][3] = {
