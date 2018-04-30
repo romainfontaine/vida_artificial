@@ -10,11 +10,11 @@
 #include "TurtleInterpreter.h"
 #include "LSystem.h"
 #include "Plant.h"
-#include "Boid.h"
+#include "Prey.h"
 #include "Predator.h"
 
-int Boid::ID_COUNT = 0;
-const double Boid::SQUARED_DIST_SEPARATION = 0.015;
+int Prey::ID_COUNT = 0;
+const double Prey::SQUARED_DIST_SEPARATION = 0.015;
 const double Predator::SQUARED_DIST_EAT = 0.01;
 
 static std::vector<Point> fish1{
@@ -105,9 +105,9 @@ static Plant p3(Turtle(.02, 20, 0, -1, 1, .1), LSystem('F',{
 #include "Food.h"
 static Food food(100);
 #include "Animal.h"
-#include "Boid.h"
+#include "Prey.h"
 #include "Predator.h"
-static std::vector<Boid> preys;
+static std::vector<Prey> preys;
 static std::vector<Predator> predators;
 
 #include "ReactionDiffusion.h"
@@ -175,7 +175,7 @@ void renderFunction()
         if (!preys[i].consumeEnergy())
         {
             std::cout << preys[i] << std::endl;
-            preys[i] = Boid::individual(&food, &fish2);
+            preys[i] = Prey::individual(&food, &fish2);
             preys[i].setPosition(unif(re), unif(re));
         }
         preys[i].draw();
@@ -230,7 +230,7 @@ int main(int argc, char** argv)
     std::uniform_real_distribution<double> unif(-1, 1);
     for (int i = 0; i < 20; i++)
     {
-        preys.push_back(Boid::individual(&food, &fish2));
+        preys.push_back(Prey::individual(&food, &fish2));
         preys.back().setPosition(unif(re), unif(re));
     }
     for (int i = 0; i < 3; i++)

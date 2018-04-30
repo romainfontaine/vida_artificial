@@ -7,20 +7,20 @@
 #include <random>
 
 #include "Tools.h"
-#include "Boid.h"
+#include "Prey.h"
 #include "Predator.h"
 
-void Boid::update(const std::vector<Boid> &boids,
+void Prey::update(const std::vector<Prey> &preys,
         const std::vector<Predator> &predators)
 {
     std::pair<double, double> e;
-    std::pair<double, double> s = separation(boids);
+    std::pair<double, double> s = separation(preys);
     vx += e.first * 1000 + s.first;
     vy += e.second * 1000 + s.second;
     if (!escapePredator(predators, e))
     {
-        std::pair<double, double> c = cohesion(boids);
-        std::pair<double, double> a = alignment(boids);
+        std::pair<double, double> c = cohesion(preys);
+        std::pair<double, double> a = alignment(preys);
         std::pair<double, double> f = foodMove();
         vx += f.first + c.first + a.first;
         vy += f.second + c.second + a.second;
@@ -29,7 +29,7 @@ void Boid::update(const std::vector<Boid> &boids,
     eatFood();
 }
 
-bool Boid::escapePredator(const std::vector<Predator> &predators,
+bool Prey::escapePredator(const std::vector<Predator> &predators,
         std::pair<double, double> &newDirection) const
 {
     newDirection.first = 0;
@@ -49,7 +49,7 @@ bool Boid::escapePredator(const std::vector<Predator> &predators,
     return danger;
 }
 
-void Boid::eatFood()
+void Prey::eatFood()
 {
     int xgrid = (x + 1) / 2 * food->n_food_sites;
     int ygrid = (y + 1) / 2 * food->n_food_sites;
@@ -69,26 +69,26 @@ void Boid::eatFood()
     }
 }
 
-std::pair<double, double> Boid::cohesion(const std::vector<Boid> &boids) const
+std::pair<double, double> Prey::cohesion(const std::vector<Prey> &preys) const
 {
     double sx = 0, sy = 0;
-    for (const Boid &b : boids)
+    for (const Prey &b : preys)
     {
         if (b.id == id)
             continue;
         sx += b.x;
         sy += b.y;
     }
-    sx /= boids.size() - 1;
-    sy /= boids.size() - 1;
+    sx /= preys.size() - 1;
+    sy /= preys.size() - 1;
 
     return std::make_pair(sx / 100, sy / 100);
 }
 
-std::pair<double, double> Boid::separation(const std::vector<Boid> &boids) const
+std::pair<double, double> Prey::separation(const std::vector<Prey> &preys) const
 {
     double sx = 0, sy = 0;
-    for (const Boid &b : boids)
+    for (const Prey &b : preys)
     {
         if (b.id == id)
             continue;
@@ -101,22 +101,22 @@ std::pair<double, double> Boid::separation(const std::vector<Boid> &boids) const
     return std::make_pair(sx, sy);
 }
 
-std::pair<double, double> Boid::alignment(const std::vector<Boid> &boids) const
+std::pair<double, double> Prey::alignment(const std::vector<Prey> &preys) const
 {
     double sx = 0, sy = 0;
-    for (const Boid &b : boids)
+    for (const Prey &b : preys)
     {
         if (b.id == id)
             continue;
         sx += b.vx;
         sy += b.vy;
     }
-    sx /= boids.size() - 1;
-    sy /= boids.size() - 1;
+    sx /= preys.size() - 1;
+    sy /= preys.size() - 1;
     return std::make_pair((sx - vx) / 8, (sy - vy) / 8);
 }
 
-std::pair<double, double> Boid::foodMove() const
+std::pair<double, double> Prey::foodMove() const
 {
     int xgrid = (x + 1) / 2 * food->n_food_sites;
     int ygrid = (y + 1) / 2 * food->n_food_sites;
