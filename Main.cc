@@ -305,7 +305,7 @@ int main(int argc, char** argv)
         preys.push_back(Boid::individual(&food, &fish2));
         preys.back().setPosition(unif(re), unif(re));
     }
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < 3; i++)
     {
         predators.push_back(Predator::individual(&fish1));
         predators.back().setPosition(unif(re), unif(re));

@@ -14,20 +14,16 @@ void Boid::update(const std::vector<Boid> &boids,
         const std::vector<Predator> &predators)
 {
     std::pair<double, double> e;
-    if (escapePredator(predators, e))
-    {
-        vx += e.first;
-        vy += e.second;
-    }
-    else
+    std::pair<double, double> s = separation(boids);
+    vx += e.first * 1000 + s.first;
+    vy += e.second * 1000 + s.second;
+    if (!escapePredator(predators, e))
     {
         std::pair<double, double> c = cohesion(boids);
-        std::pair<double, double> s = separation(boids);
         std::pair<double, double> a = alignment(boids);
         std::pair<double, double> f = foodMove();
-
-        vx += c.first + s.first + a.first + f.first;
-        vy += c.second + s.second + a.second + f.second;
+        vx += f.first + c.first + a.first;
+        vy += f.second + c.second + a.second;
     }
     updatePosition_NormalizeSpeed();
     eatFood();
@@ -38,20 +34,19 @@ bool Boid::escapePredator(const std::vector<Predator> &predators,
 {
     newDirection.first = 0;
     newDirection.second = 0;
-    int c = 0;
+    bool danger = false;
     for (const Predator &p : predators)
     {
-        if (squaredTorusDistance(p) < 0.03)
+        if (squaredTorusDistance(p) < 0.05)
         {
             auto pos = p.getPosition();
-            auto d = Animal::diff(2.,x, pos.first, y, pos.second);
-            newDirection.first += d.first;
-            newDirection.second += d.second;
-            c++;
+            newDirection.first += x - pos.first;
+            newDirection.second += y - pos.second;
+            danger = true;
         }
     }
 
-    return c != 0;
+    return danger;
 }
 
 void Boid::eatFood()
