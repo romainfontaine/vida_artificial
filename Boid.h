@@ -3,6 +3,7 @@
 
 #include "Animal.h"
 #include "Food.h"
+#include "ReactionDiffusion.h"
 
 class Predator;
 
@@ -18,6 +19,11 @@ public:
     Boid(Food* f, const Animal &an, const int &vision = 10)
     : Animal(an),
     id(ID_COUNT++), vision(vision), food(f) {
+        react = ReactionDiffusion(0.0545, 0.062);
+        react.initReact(skin_xinit, skin_yinit, skin_radius);
+        for (int i = 0; i < 5000; i++)
+            react.iterate();
+        react.generateUCharArray();
     }
 
     friend std::ostream& operator<<(std::ostream& s, const Boid& b) {

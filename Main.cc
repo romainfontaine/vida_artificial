@@ -111,7 +111,7 @@ static std::vector<Boid> preys;
 static std::vector<Predator> predators;
 
 #include "ReactionDiffusion.h"
-ReactionDiffusion react;
+ReactionDiffusion react(0.034, 0.0618); //(0.0353, .0566);
 
 void texture(unsigned char* texDat, unsigned int tw, unsigned int th,
         double x = 0, double y = 0, double w = 1, double h = 1)
@@ -129,6 +129,7 @@ void texture(unsigned char* texDat, unsigned int tw, unsigned int th,
     //clear and draw quad with texture (could be in display callback)
     glBindTexture(GL_TEXTURE_2D, tex);
     glEnable(GL_TEXTURE_2D);
+
     glBegin(GL_QUADS);
     glTexCoord2i(0, 0);
     glVertex2f(x, y);
@@ -138,7 +139,16 @@ void texture(unsigned char* texDat, unsigned int tw, unsigned int th,
     glVertex2f(x + w, y + h);
     glTexCoord2i(1, 0);
     glVertex2f(x + w, y);
-    glEnd();
+    glEnd(); /*
+    glBegin(GL_POLYGON);
+    for (const Point &p : fish1)
+    {
+        glVertex2f(p.x*.2, p.y*.2);
+        glTexCoord2f(p.x, .5+p.y);
+    }
+    glEnd();*/
+
+
     glDisable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, 0);
     glDeleteTextures(1, &tex);
@@ -189,7 +199,7 @@ void renderFunction()
     for (int i = 0; i < 5; i++)
         react.iterate();
 
-    texture(react.toUCharArray(), react.getSize(), react.getSize(), -.5, -.5, 1, 1);
+    //texture(react.toUCharArray(), react.getSize(), react.getSize(), -.5, -.5, 1, 1);
 
     glFlush();
 }
@@ -203,7 +213,7 @@ void timer(int)
 
 int main(int argc, char** argv)
 {
-    react.initReact();
+    react.initReact(20, 20, 5);
 
     // X, Y, QTY
     unsigned int food_sites_sp[][3] = {

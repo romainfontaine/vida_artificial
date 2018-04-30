@@ -15,11 +15,15 @@
 #define REACTIONDIFFUSION_H
 
 class ReactionDiffusion {
-    static const int size = 128;
+public:
+    static const int size = 40;
+private:
     float u[2][size][size] = {};
     float v[2][size][size] = {};
     unsigned char texture[size * size * 3];
     int current = 0;
+
+    float F, k;
 
     inline float laplacian(const int &i, const int &j, float m[size][size]) {
         return -1 * m[i][j] +
@@ -37,46 +41,33 @@ class ReactionDiffusion {
 
 public:
 
-    int getSize(){
+    ReactionDiffusion(float F = 0.0545, float k = 0.062) : F(F), k(k) {
+
+    }
+
+    int getSize() const {
         return this->size;
     }
-    
-    void initReact() {
-        std::random_device r;
-        std::mt19937 g(r());
-        std::uniform_real_distribution<> d(0., 1.);
+
+    void initReact(int x = 0, int y = 20, int r = 2) {
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 u[0][i][j] = 1;
-                //if (i > 20 && i < 30 && j > 20 && j < 30)
-                //    v[0][i][j] = 1;
             }
         }
-
-
-        std::normal_distribution<double> distribution(0, 15);
-        std::uniform_int_distribution<> integ(size / 2 - 10, size / 2 + 10);
-        for (int l = 0; l < 1; l++) {
-            int x = integ(g), y = integ(g);
-            std::cout << x << " " << y << std::endl;
-            for (int k = 0; k < 10000; k++) {
-                int nx = x + (int) distribution(g), ny = y + (int) distribution(g);
-                if (nx < 0 || nx >= size || ny < 0 || ny >= size)
-                    continue;
-                v[0][nx][ny] = d(g); //1;
+        for (int i = -r; i < r; i++) {
+            for (int j = -r; j < r; j++) {
+                int nx = x + i, ny = y + j;
+                if ((x - nx)*(x - nx)+(y - ny)*(y - ny) <= r * r) {
+                    v[0][positive_modulo(nx, size)][positive_modulo(ny, size)] = 1;
+                }
             }
-
         }
-        /*std::uniform_int_distribution<> i(size, size);
-        for(int k = 0; k<10;k++){
-            v[0][i(g)][i(g)]=1;
-        }*/
-
     }
 
     void iterate(const float &t = 1) {
         current = 1 - current;
-        float Du = 0.2097, Dv = .105, F = 0.0545, k = 0.062;
+        float Du = 0.2097, Dv = .105;
 
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
@@ -91,9 +82,9 @@ public:
         }
     }
 
-    unsigned char* toUCharArray() {
+    void generateUCharArray() {
         double colors[][3] = {
-            {0., 0.867, 0.},
+            {0.867, 0.867, 0.},
             {0., .8, .8},
             {0., 0., .8},
             {0., 0., .27}
@@ -118,8 +109,13 @@ public:
                 }
             }
         }
+    }
+
+    const unsigned char* toUCharArray() const {
         return texture;
     }
+
+
 };
 
 

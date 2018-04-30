@@ -1,6 +1,9 @@
 #ifndef PREDATOR_H
 #define PREDATOR_H
 
+#include "ReactionDiffusion.h"
+#include "Animal.h"
+
 class Predator : public Animal {
     double vision;
     static const double SQUARED_DIST_EAT;
@@ -8,6 +11,11 @@ public:
 
     Predator(const Animal &an, const double &vision = .7)
     : Animal(an), vision(vision) {
+        react = ReactionDiffusion(0.034, 0.0618);
+        react.initReact(skin_xinit, skin_yinit, skin_radius);
+        for (int i = 0; i < 5000; i++)
+            react.iterate();
+        react.generateUCharArray();
     }
 
     void eatFood(std::vector<Boid> &boids) {
