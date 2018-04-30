@@ -41,10 +41,7 @@ protected:
             y = fmod(y + 3, 2) - 1;
         }
     }
-
-
 public:
-
     void setPosition(const double &x, const double &y) {
         this->x = x;
         this->y = y;

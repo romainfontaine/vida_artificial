@@ -263,7 +263,8 @@ void renderFunction()
     for (unsigned int i = 0; i < predators.size(); i++)
     {
         predators[i].update(preys);
-        if (!preys[i].consumeEnergy())
+        predators[i].eatFood(preys);
+        if (!predators[i].consumeEnergy())
         {
             predators[i] = Predator(Animal(&fish1));
             predators[i].setPosition(unif(re), unif(re));
