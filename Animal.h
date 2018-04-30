@@ -28,6 +28,19 @@ protected:
         double x = std::min(std::abs(fy - ny), size - std::abs(fy - ny));
         return a * a + x * x;
     }
+
+    void updatePosition_NormalizeSpeed() {
+        vx = std::min(vmax, std::max(-vmax, vx));
+        vy = std::min(vmax, std::max(-vmax, vy));
+        x += vx;
+        y += vy;
+        if (x<-1 || x > 1) {
+            x = fmod(x + 3, 2) - 1;
+        }
+        if (y<-1 || y > 1) {
+            y = fmod(y + 3, 2) - 1;
+        }
+    }
 public:
 
     void setPosition(const double &x, const double &y) {

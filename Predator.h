@@ -18,16 +18,7 @@ public:
 
         vx += c.first;
         vy += c.second;
-        vx = std::min(vmax, std::max(-vmax, vx));
-        vy = std::min(vmax, std::max(-vmax, vy));
-        x += vx;
-        y += vy;
-        if (x<-1 || x > 1) {
-            x = fmod(x + 3, 2) - 1;
-        }
-        if (y<-1 || y > 1) {
-            y = fmod(y + 3, 2) - 1;
-        }
+        updatePosition_NormalizeSpeed();
         eatFood(boids);
     }
 
