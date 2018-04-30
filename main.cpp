@@ -263,6 +263,11 @@ void renderFunction()
     for (unsigned int i = 0; i < predators.size(); i++)
     {
         predators[i].update(preys);
+        if (!preys[i].consumeEnergy())
+        {
+            predators[i] = Predator(Animal(&fish1));
+            predators[i].setPosition(unif(re), unif(re));
+        }
         predators[i].draw();
     }
     food.regenerateFood();
@@ -318,6 +323,7 @@ int main(int argc, char** argv)
     for (int i = 0; i < 5; i++)
     {
         predators.push_back(Predator(Animal(&fish1)));
+        predators.back().setPosition(unif(re), unif(re));
     }
 
     glutInit(&argc, argv);

@@ -23,7 +23,10 @@ public:
     }
 
     std::pair<double, double> moveToFood(const std::vector<Boid> &boids) {
-        /*double minDist = squaredTorusDistance(boids[0]);
+        if (boids.size() == 0) {
+            return std::make_pair(.0, .0);
+        }
+        double minDist = squaredTorusDistance(boids[0]);
         int minIdx = 0;
         for (unsigned int i = 1; i < boids.size(); i++) {
             double d = squaredTorusDistance(boids[i]);
@@ -35,13 +38,11 @@ public:
         if (minDist > vision)
             return std::make_pair(.0, .0);
         else {
-            auto p = boids[minIdx].getPosition();
-            return std::make_pair(p.first - x, p.second.y);
-
-        }*/
-        boids[0];
-        return std::make_pair(.1, .1);
-
+            std::pair<double, double> p = boids[minIdx].getPosition();
+            double dx = p.first - x;
+            double dy = p.second - y;
+            return std::make_pair(dx>1?dx-2:dx, dy>1?dy-2:dy);
+        }
     }
 
 

@@ -41,6 +41,8 @@ protected:
             y = fmod(y + 3, 2) - 1;
         }
     }
+
+
 public:
 
     void setPosition(const double &x, const double &y) {
@@ -59,6 +61,10 @@ public:
         for (const Point &p : *shape)
             glVertex3d(x + p.x * xscale, y + (p.y + sign(p.y)*(exp(p.x * perspective) - 1)) * yscale, p.z);
         glEnd();
+    }
+
+    bool consumeEnergy() {
+        return ((foodStock -= metabolism) > 0) && (age++<agelimit);
     }
 private:
 

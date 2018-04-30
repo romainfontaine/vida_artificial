@@ -52,9 +52,6 @@ public:
         eatFood();
     }
 
-    bool consumeEnergy() {
-        return ((foodStock -= metabolism) > 0) && (age++<agelimit);
-    }
 
 private:
 
