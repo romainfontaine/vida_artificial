@@ -4,34 +4,18 @@
 #include <vector>
 #include <map>
 #include <iostream>
+#include <random>
 
-struct Point
-{
-    double x, y, z;
-
-    Point(double x, double y, double z) : x(x), y(y), z(z)
-    {
-    };
-};
-
-struct Color
-{
-    double r, g, b;
-
-    Color(double r, double g, double b) : r(r), g(g), b(b)
-    {
-    };
-};
-
-inline int positive_modulo(int i, int n)
-{
-    return (i % n + n) % n;
-}
-
+#include "Tools.h"
 #include "TurtleInterpreter.h"
 #include "LSystem.h"
 #include "Plant.h"
+#include "Boid.h"
+#include "Predator.h"
 
+int Boid::ID_COUNT = 0;
+const double Boid::SQUARED_DIST_SEPARATION = 0.015;
+const double Predator::SQUARED_DIST_EAT = 0.01;
 
 static std::vector<Point> fish1{
     {0.0625, -0.0692307692, 1},
@@ -251,7 +235,7 @@ void renderFunction()
     std::uniform_real_distribution<double> unif(-1, 1);
     for (unsigned int i = 0; i < preys.size(); i++)
     {
-        preys[i].update(preys);
+        preys[i].update(preys, predators);
         if (!preys[i].consumeEnergy())
         {
             std::cout << preys[i] << std::endl;

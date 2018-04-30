@@ -34,6 +34,11 @@ protected:
         return squaredTorusDistance(2, x, y, a.x, a.y);
     }
 
+    static std::pair<double, double> diff(const double &size, const double &fx, const double &fy, const double &nx, const double &ny) {
+        return std::make_pair(std::min(std::abs(fx - nx), size - std::abs(fx - nx)),
+                std::min(std::abs(fy - ny), size - std::abs(fy - ny)));
+    }
+
     static double squaredTorusDistance(const double &size, const double &fx, const double &fy, const double &nx, const double &ny) {
         // Source: https://stackoverflow.com/q/2123947/4384857
         double a = std::min(std::abs(fx - nx), size - std::abs(fx - nx));

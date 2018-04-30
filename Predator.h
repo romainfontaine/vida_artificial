@@ -69,7 +69,6 @@ public:
     }
 };
 
-const double Predator::SQUARED_DIST_EAT = 0.01;
 
 #endif /* PREDATOR_H */
 

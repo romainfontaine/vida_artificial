@@ -1,8 +1,6 @@
 #ifndef TURTLE_H
 #define TURTLE_H
 
-#include <random>
-
 class Turtle {
     double d;
     double delta;
