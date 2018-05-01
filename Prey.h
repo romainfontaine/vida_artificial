@@ -47,6 +47,10 @@ public:
     void update(const std::vector<Prey> &preys,
             const std::vector<Predator> &predators);
 
+    unsigned int getFoodStock() {
+        return foodStock;
+    }
+
 
 private:
 

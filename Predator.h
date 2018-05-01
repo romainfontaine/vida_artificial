@@ -21,6 +21,7 @@ public:
     void eatFood(std::vector<Prey> &preys) {
         for (unsigned int i = 0; i < preys.size(); i++) {
             if (squaredTorusDistance(preys[i]) < SQUARED_DIST_EAT) {
+                foodStock += preys[i].getFoodStock();
                 preys.erase(preys.begin() + i);
                 break;
             }
