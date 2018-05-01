@@ -1,6 +1,12 @@
 #ifndef TOOLS_H
 #define TOOLS_H
 
+#include "GL/freeglut.h"
+#include "GL/gl.h"
+
+
+#include <string>
+
 struct Point {
     double x, y, z;
 
@@ -17,6 +23,15 @@ struct Color {
 
 inline int positive_modulo(int i, int n) {
     return (i % n + n) % n;
+}
+
+inline void displayText(const float &x, const float &y, const int &r,
+        const int &g, const int &b, const std::string &string) {
+    glColor3f(r, g, b);
+    glRasterPos2f(x, y);
+    for (unsigned int i = 0; i < string.length(); i++) {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, string[i]);
+    }
 }
 
 
