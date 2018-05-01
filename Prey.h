@@ -15,15 +15,17 @@ protected:
     int id, vision;
     Food* food;
 public:
+    
+    Food* getFood(){
+        return food;
+    }
 
     Prey(Food* f, const Animal &an, const int &vision = 10)
     : Animal(an),
     id(ID_COUNT++), vision(vision), food(f) {
         react = ReactionDiffusion(0.0545, 0.062);
         react.initReact(skin_xinit, skin_yinit, skin_radius);
-        for (int i = 0; i < 5000; i++)
-            react.iterate();
-        react.generateUCharArray();
+        genTexture();
     }
 
     friend std::ostream& operator<<(std::ostream& s, const Prey& b) {
@@ -35,17 +37,17 @@ public:
                 b.vision;
     }
 
-    static Prey individual(Food* f, const std::vector<Point> *shape) {
+    static Prey* individual(Food* f, const std::vector<Point> *shape) {
         std::random_device rd;
         std::mt19937 gen(rd());
         std::uniform_int_distribution<> dis_vision(5, 15);
 
         Animal an = Animal::individual(shape);
-        return Prey(f, an, dis_vision(gen));
+        return new Prey(f, an, dis_vision(gen));
     }
 
-    void update(const std::vector<Prey> &preys,
-            const std::vector<Predator> &predators);
+    void update(const std::vector<Prey*> &preys,
+            const std::vector<Predator*> &predators);
 
     unsigned int getFoodStock() {
         return foodStock;
@@ -54,16 +56,16 @@ public:
 
 private:
 
-    bool escapePredator(const std::vector<Predator> &predators,
+    bool escapePredator(const std::vector<Predator*> &predators,
             std::pair<double, double> &newDirection) const;
 
     void eatFood();
 
-    std::pair<double, double> cohesion(const std::vector<Prey> &preys) const;
+    std::pair<double, double> cohesion(const std::vector<Prey*> &preys) const;
 
-    std::pair<double, double> separation(const std::vector<Prey> &preys) const;
+    std::pair<double, double> separation(const std::vector<Prey*> &preys) const;
 
-    std::pair<double, double> alignment(const std::vector<Prey> &preys) const;
+    std::pair<double, double> alignment(const std::vector<Prey*> &preys) const;
 
     std::pair<double, double> foodMove() const;
 };

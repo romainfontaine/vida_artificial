@@ -1,6 +1,8 @@
 #ifndef ANIMAL_H
 #define ANIMAL_H
-
+#include <thread>
+#include <atomic>
+#include <memory>
 #include "ReactionDiffusion.h"
 
 class Animal {
@@ -10,6 +12,9 @@ protected:
     int foodStock, metabolism, age, agelimit;
     int skin_xinit, skin_yinit, skin_radius;
     ReactionDiffusion react;
+    std::shared_ptr<std::thread> t;
+    std::shared_ptr<std::atomic<bool>> done;
+    std::shared_ptr<std::atomic<bool>> stop;
 public:
 
     Animal(const std::vector<Point> *shape, const double &x = 0, const double &y = 0,
@@ -20,7 +25,8 @@ public:
     : shape(shape), x(x), y(y), vx(0), vy(0), vmax(vmax), xscale(xscale), yscale(yscale),
     perspective(perspective), foodStock(foodStock), metabolism(metabolism), age(0), agelimit(agelimit),
     skin_xinit(skin_xinit), skin_yinit(skin_yinit), skin_radius(skin_radius) {
-
+        done = std::shared_ptr < std::atomic<bool>>(new std::atomic<bool>(false));
+        stop = std::shared_ptr < std::atomic<bool>>(new std::atomic<bool>(false));
 
     }
 
@@ -36,7 +42,29 @@ public:
         return Animal(shape, 0, 0, 200, dis_meta(gen), dis_age(gen), dis_speed(gen), dis_scale(gen),
                 dis_scale(gen), dis_persp(gen), dis_skin_pos(gen), dis_skin_pos(gen));
     }
+
+    const std::vector<Point> * getShape() const {
+        return shape;
+    }
+
+    void kill() {
+        *stop = true;
+        t->join();
+    }
 protected:
+
+    void genTexture() {
+        t = std::shared_ptr<std::thread>(new std::thread(&Animal::gen, this));
+    }
+
+    void gen() {
+
+        for (int i = 0; i < 5000 && !*stop; i++)
+            react.iterate();
+        if (!*stop)
+            react.generateUCharArray();
+        *done = true;
+    }
 
     double squaredTorusDistance(const Animal &a) const {
         return squaredTorusDistance(2, x, y, a.x, a.y);
@@ -75,49 +103,49 @@ public:
     void draw() const {
         const double x = this->x - 0.5 * xscale; // Center
 
+        if (*done) {
+            const unsigned char* texDat = react.toUCharArray();
+            int tw = react.getSize(), th = react.getSize();
+            // Source: https://stackoverflow.com/a/24266568/4384857
+            //upload to GPU texture
+            GLuint tex;
+            glGenTextures(1, &tex);
+            glBindTexture(GL_TEXTURE_2D, tex);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tw, th, 0, GL_RGB, GL_UNSIGNED_BYTE, texDat);
+            glBindTexture(GL_TEXTURE_2D, 0);
 
-        const unsigned char* texDat = react.toUCharArray();
-        int tw = react.getSize(), th = react.getSize();
-        // Source: https://stackoverflow.com/a/24266568/4384857
-        //upload to GPU texture
-        GLuint tex;
-        glGenTextures(1, &tex);
-        glBindTexture(GL_TEXTURE_2D, tex);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tw, th, 0, GL_RGB, GL_UNSIGNED_BYTE, texDat);
-        glBindTexture(GL_TEXTURE_2D, 0);
+            //clear and draw quad with texture (could be in display callback)
+            glBindTexture(GL_TEXTURE_2D, tex);
+            glEnable(GL_TEXTURE_2D);
+            float h = .05, w = .05;
+            glColor4f(1.0, 1.0, 1.0, 1.0);
+            glBegin(GL_QUADS);
+            glTexCoord2f(0, 0);
+            glVertex2f(x + w / 2, y - h / 2);
+            glTexCoord2f(0, 1);
+            glVertex2f(x + w / 2, y + h - h / 2);
+            glTexCoord2f(1, 1);
+            glVertex2f(x + w + w / 2, y + h - h / 2);
+            glTexCoord2f(1, 0);
+            glVertex2f(x + w + w / 2, y - h / 2);
+            glEnd();
+            /*
+            glColor3f(1.0, 1.0, 1.0);
+            glBegin(GL_POLYGON);
+            for (const Point &p : *shape) {
+                glVertex2f(x + p.x * xscale, y + (p.y + sign(p.y)*(exp(p.x * perspective) - 1)) * yscale);
+                glTexCoord2f(p.x, .5 + p.y);
+            }
+            glEnd();
+             */
 
-        //clear and draw quad with texture (could be in display callback)
-        glBindTexture(GL_TEXTURE_2D, tex);
-        glEnable(GL_TEXTURE_2D);
-        float h = .05, w = .05;
-        glColor4f(1.0, 1.0, 1.0, 1.0);
-        glBegin(GL_QUADS);
-        glTexCoord2f(0, 0);
-        glVertex2f(x + w / 2, y - h / 2);
-        glTexCoord2f(0, 1);
-        glVertex2f(x + w / 2, y + h - h / 2);
-        glTexCoord2f(1, 1);
-        glVertex2f(x + w + w / 2, y + h - h / 2);
-        glTexCoord2f(1, 0);
-        glVertex2f(x + w + w / 2, y - h / 2);
-        glEnd();
-        /*
-        glColor3f(1.0, 1.0, 1.0);
-        glBegin(GL_POLYGON);
-        for (const Point &p : *shape) {
-            glVertex2f(x + p.x * xscale, y + (p.y + sign(p.y)*(exp(p.x * perspective) - 1)) * yscale);
-            glTexCoord2f(p.x, .5 + p.y);
+            glDisable(GL_TEXTURE_2D);
+            glBindTexture(GL_TEXTURE_2D, 0);
+            glDeleteTextures(1, &tex);
+
         }
-        glEnd();
-         */
-
-        glDisable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, 0);
-        glDeleteTextures(1, &tex);
-
-
         glColor3d(1., 1., 1.);
         glBegin(GL_LINE_LOOP);
         for (const Point &p : *shape)

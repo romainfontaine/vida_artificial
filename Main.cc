@@ -103,12 +103,12 @@ static Plant p3(Turtle(.02, 20, 0, -1, 1, .1), LSystem('F',{
 }), 5, Color(96. / 255, 140. / 255, 93. / 255));
 
 #include "Food.h"
-static Food food(100);
+Food food(100);
 #include "Animal.h"
 #include "Prey.h"
 #include "Predator.h"
-static std::vector<Prey> preys;
-static std::vector<Predator> predators;
+static std::vector<Prey*> preys;
+static std::vector<Predator*> predators;
 
 #include "ReactionDiffusion.h"
 ReactionDiffusion react(0.034, 0.0618); //(0.0353, .0566);
@@ -171,25 +171,29 @@ void renderFunction()
     std::uniform_real_distribution<double> unif(-1, 1);
     for (unsigned int i = 0; i < preys.size(); i++)
     {
-        preys[i].update(preys, predators);
-        if (!preys[i].consumeEnergy())
+        preys[i]->update(preys, predators);
+        if (!preys[i]->consumeEnergy())
         {
-            std::cout << preys[i] << std::endl;
+            std::cout << *preys[i] << std::endl;
+            preys[i]->kill();
+            delete preys[i];
             preys[i] = Prey::individual(&food, &fish2);
-            preys[i].setPosition(unif(re), unif(re));
+            preys[i]->setPosition(unif(re), unif(re));
         }
-        preys[i].draw();
+        preys[i]->draw();
     }
     for (unsigned int i = 0; i < predators.size(); i++)
     {
-        predators[i].update(preys);
-        predators[i].eatFood(preys);
-        if (!predators[i].consumeEnergy())
+        predators[i]->update(preys);
+        predators[i]->eatFood(preys);
+        if (!predators[i]->consumeEnergy())
         {
+            predators[i]->kill();
+            delete predators[i];
             predators[i] = Predator::individual(&fish1);
-            predators[i].setPosition(unif(re), unif(re));
+            predators[i]->setPosition(unif(re), unif(re));
         }
-        predators[i].draw();
+        predators[i]->draw();
     }
     food.regenerateFood();
 
@@ -228,15 +232,15 @@ int main(int argc, char** argv)
     std::default_random_engine re(rd());
 
     std::uniform_real_distribution<double> unif(-1, 1);
-    for (int i = 0; i < 20; i++)
+    for (int i = 0; i < 15; i++)
     {
         preys.push_back(Prey::individual(&food, &fish2));
-        preys.back().setPosition(unif(re), unif(re));
+        preys.back()->setPosition(unif(re), unif(re));
     }
     for (int i = 0; i < 3; i++)
     {
         predators.push_back(Predator::individual(&fish1));
-        predators.back().setPosition(unif(re), unif(re));
+        predators.back()->setPosition(unif(re), unif(re));
     }
 
     glutInit(&argc, argv);

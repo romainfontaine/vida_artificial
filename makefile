@@ -1,4 +1,4 @@
-GENERATE_CMD = -O3 -pedantic -Wall -Wextra -Werror -lglut -lGLU -lGL -lm -std=c++11
+GENERATE_CMD = -O3 -lpthread -pedantic -Wall -Wextra -Werror -lglut -lGLU -lGL -lm -std=c++11
 HEADERS	    := $(wildcard *.h)
 SOURCE	    := $(wildcard *.cc)
 OBJ = $(SOURCE:cc=o)

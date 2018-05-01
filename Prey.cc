@@ -10,8 +10,8 @@
 #include "Prey.h"
 #include "Predator.h"
 
-void Prey::update(const std::vector<Prey> &preys,
-        const std::vector<Predator> &predators)
+void Prey::update(const std::vector<Prey*> &preys,
+        const std::vector<Predator*> &predators)
 {
     std::pair<double, double> e;
     std::pair<double, double> s = separation(preys);
@@ -29,17 +29,17 @@ void Prey::update(const std::vector<Prey> &preys,
     eatFood();
 }
 
-bool Prey::escapePredator(const std::vector<Predator> &predators,
+bool Prey::escapePredator(const std::vector<Predator*> &predators,
         std::pair<double, double> &newDirection) const
 {
     newDirection.first = 0;
     newDirection.second = 0;
     bool danger = false;
-    for (const Predator &p : predators)
+    for (const Predator* p : predators)
     {
-        if (squaredTorusDistance(p) < 0.05)
+        if (squaredTorusDistance(*p) < 0.05)
         {
-            auto pos = p.getPosition();
+            auto pos = p->getPosition();
             newDirection.first += x - pos.first;
             newDirection.second += y - pos.second;
             danger = true;
@@ -69,15 +69,15 @@ void Prey::eatFood()
     }
 }
 
-std::pair<double, double> Prey::cohesion(const std::vector<Prey> &preys) const
+std::pair<double, double> Prey::cohesion(const std::vector<Prey*> &preys) const
 {
     double sx = 0, sy = 0;
-    for (const Prey &b : preys)
+    for (const Prey* b : preys)
     {
-        if (b.id == id)
+        if (b->id == id)
             continue;
-        sx += b.x;
-        sy += b.y;
+        sx += b->x;
+        sy += b->y;
     }
     sx /= preys.size() - 1;
     sy /= preys.size() - 1;
@@ -85,31 +85,31 @@ std::pair<double, double> Prey::cohesion(const std::vector<Prey> &preys) const
     return std::make_pair(sx / 100, sy / 100);
 }
 
-std::pair<double, double> Prey::separation(const std::vector<Prey> &preys) const
+std::pair<double, double> Prey::separation(const std::vector<Prey*> &preys) const
 {
     double sx = 0, sy = 0;
-    for (const Prey &b : preys)
+    for (const Prey* b : preys)
     {
-        if (b.id == id)
+        if (b->id == id)
             continue;
-        if (squaredTorusDistance(b) < SQUARED_DIST_SEPARATION)
+        if (squaredTorusDistance(*b) < SQUARED_DIST_SEPARATION)
         {
-            sx -= b.x - x;
-            sy -= b.y - y;
+            sx -= b->x - x;
+            sy -= b->y - y;
         }
     }
     return std::make_pair(sx, sy);
 }
 
-std::pair<double, double> Prey::alignment(const std::vector<Prey> &preys) const
+std::pair<double, double> Prey::alignment(const std::vector<Prey*> &preys) const
 {
     double sx = 0, sy = 0;
-    for (const Prey &b : preys)
+    for (const Prey* b : preys)
     {
-        if (b.id == id)
+        if (b->id == id)
             continue;
-        sx += b.vx;
-        sy += b.vy;
+        sx += b->vx;
+        sy += b->vy;
     }
     sx /= preys.size() - 1;
     sy /= preys.size() - 1;
