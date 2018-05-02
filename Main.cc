@@ -14,6 +14,7 @@
 #include "Predator.h"
 
 bool Animal::debug = true;
+bool Animal::big_textures = false;
 int Prey::ID_COUNT = 0;
 const double Prey::SQUARED_DIST_SEPARATION = 0.015;
 const double Predator::SQUARED_DIST_EAT = 0.01;
@@ -218,11 +219,15 @@ void timer(int)
 
 void keyboard_handler(unsigned char key, int x, int y)
 {
-    x=x;
-    y=y;
+    x = x;
+    y = y;
     if (key == 'd' || key == 'D')
     {
         Animal::debug = !Animal::debug;
+    }
+    if (key == 's' || key == 'S')
+    {
+        Animal::big_textures = !Animal::big_textures;
     }
 }
 

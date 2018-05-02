@@ -18,6 +18,7 @@ protected:
     std::shared_ptr<std::atomic<bool>> stop;
 public:
     static bool debug;
+    static bool big_textures;
 
     Animal(const std::vector<Point> *shape, const double &x = 0, const double &y = 0,
             const int &foodStock = 200, const int &metabolism = 1,
@@ -122,7 +123,7 @@ public:
             //clear and draw quad with texture (could be in display callback)
             glBindTexture(GL_TEXTURE_2D, tex);
             glEnable(GL_TEXTURE_2D);
-            float h = .05, w = .05;
+            float h = big_textures ? .15 : .05, w = big_textures ? .15 : .05;
             glColor4f(1.0, 1.0, 1.0, 1.0);
             glBegin(GL_QUADS);
             glTexCoord2f(0, 0);
