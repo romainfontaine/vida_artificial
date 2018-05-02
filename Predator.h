@@ -41,7 +41,7 @@ public:
     }
 
     void update(const std::vector<Prey*> &preys) {
-        std::pair<double, double> c = moveToFood(preys);
+        std::pair<double, double> c = foodStock/(float)metabolism<=300 ? moveToFood(preys) : std::pair<double, double>{0, 0};
         const double threshold = .0000000001;
         if (std::abs(c.first) < threshold && std::abs(c.second) < threshold &&
                 std::abs(vx) < threshold && std::abs(vy) < threshold) {
