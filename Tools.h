@@ -34,6 +34,14 @@ inline void displayText(const float &x, const float &y, const int &r,
     }
 }
 
+inline void drawCircle(const float &x, const float &y, const float &r,
+        const float &red = 1, const float &green = 1, const float&blue = 1) {
+    glColor3f(red, green, blue);
+    glBegin(GL_LINE_LOOP);
+    for (double i = 0; i < 2 * M_PI; i += M_PI / 12)
+        glVertex2f(x + cos(i) * r, y + sin(i) * r);
+    glEnd();
+}
 
 #endif /* TOOLS_H */
 

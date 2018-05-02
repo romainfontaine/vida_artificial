@@ -4,6 +4,7 @@
 #include <atomic>
 #include <memory>
 #include "ReactionDiffusion.h"
+#include "Tools.h"
 
 class Animal {
 protected:
@@ -16,6 +17,7 @@ protected:
     std::shared_ptr<std::atomic<bool>> done;
     std::shared_ptr<std::atomic<bool>> stop;
 public:
+    static bool debug;
 
     Animal(const std::vector<Point> *shape, const double &x = 0, const double &y = 0,
             const int &foodStock = 200, const int &metabolism = 1,
@@ -90,6 +92,7 @@ protected:
         }
     }
 public:
+    virtual ~Animal() = default;
 
     void setPosition(const double &x, const double &y) {
         this->x = x;
@@ -100,7 +103,7 @@ public:
         return std::make_pair(x, y);
     }
 
-    void draw() const {
+    virtual void draw() const {
         const double x = this->x - 0.5 * xscale; // Center
 
         if (*done) {
@@ -151,10 +154,13 @@ public:
         for (const Point &p : *shape)
             glVertex3d(x + p.x * xscale, y + (p.y + sign(p.y)*(exp(p.x * perspective) - 1)) * yscale, p.z);
         glEnd();
-        int timeRemaining = age / (float) agelimit * 100;
-        displayText(x, y - .075, 1, timeRemaining >= 85 ? 0 : 1, timeRemaining >= 85 ? 0 : 1, std::to_string(timeRemaining) + "%");
-        int ttl = foodStock / (float) metabolism;
-        displayText(x + .5 * yscale, y - .075, 1, ttl <= 100 ? 0 : 1, ttl <= 100 ? 0 : 1, std::to_string(ttl));
+        if (Animal::debug) {
+            int timeRemaining = age / (float) agelimit * 100;
+            displayText(x, y - .075, 1, timeRemaining >= 85 ? 0 : 1, timeRemaining >= 85 ? 0 : 1, std::to_string(timeRemaining) + "%");
+            int ttl = foodStock / (float) metabolism;
+            displayText(x + .5 * yscale, y - .075, 1, ttl <= 100 ? 0 : 1, ttl <= 100 ? 0 : 1, std::to_string(ttl));
+            //displayText(x, y - .1, 1, 1,1, std::to_string(metabolism) + " "+std::to_string(foodStock));
+        }
     }
 
     bool consumeEnergy() {

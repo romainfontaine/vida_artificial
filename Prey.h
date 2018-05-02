@@ -15,8 +15,8 @@ protected:
     int id, vision;
     Food* food;
 public:
-    
-    Food* getFood(){
+
+    Food* getFood() {
         return food;
     }
 
@@ -51,6 +51,15 @@ public:
 
     unsigned int getFoodStock() {
         return foodStock;
+    }
+
+    void draw() {
+        Animal::draw();
+        /*
+        if (Animal::debug) {
+            drawCircle(x, y, .2);
+        }
+         */
     }
 
 

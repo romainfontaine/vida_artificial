@@ -6,8 +6,8 @@ OBJ = $(SOURCE:cc=o)
 main: $(OBJ)
 	g++ $^ -o $@ $(GENERATE_CMD) 
 	
-Prey.o: Tools.h Animal.h Prey.h Predator.h ReactionDiffusion.h
-Main.o: Tools.h Animal.h TurtleInterpreter.h LSystem.h Plant.h Prey.h Predator.h ReactionDiffusion.h
+Prey.o: Food.h Tools.h Animal.h Prey.h Predator.h ReactionDiffusion.h
+Main.o: Food.h Tools.h Animal.h TurtleInterpreter.h LSystem.h Plant.h Prey.h Predator.h ReactionDiffusion.h
 
 
 %.o: %.cc

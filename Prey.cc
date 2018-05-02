@@ -15,8 +15,8 @@ void Prey::update(const std::vector<Prey*> &preys,
 {
     std::pair<double, double> e;
     std::pair<double, double> s = separation(preys);
-    vx += e.first * 1000 + s.first;
-    vy += e.second * 1000 + s.second;
+    vx += s.first;
+    vy += s.second;
     if (!escapePredator(predators, e))
     {
         std::pair<double, double> c = cohesion(preys);
@@ -24,6 +24,11 @@ void Prey::update(const std::vector<Prey*> &preys,
         std::pair<double, double> f = foodMove();
         vx += f.first + c.first + a.first;
         vy += f.second + c.second + a.second;
+    }
+    else
+    {
+        vx += e.first * 1000;
+        vy += e.second * 1000;
     }
     updatePosition_NormalizeSpeed();
     eatFood();
@@ -37,7 +42,7 @@ bool Prey::escapePredator(const std::vector<Predator*> &predators,
     bool danger = false;
     for (const Predator* p : predators)
     {
-        if (squaredTorusDistance(*p) < 0.05)
+        if (squaredTorusDistance(*p) < std::pow(0.2, 2))
         {
             auto pos = p->getPosition();
             newDirection.first += x - pos.first;
@@ -45,7 +50,12 @@ bool Prey::escapePredator(const std::vector<Predator*> &predators,
             danger = true;
         }
     }
-
+    /*
+    if (danger && Animal::debug)
+    {
+        drawCircle(x, y, .05, 1, 0, 0);
+    }
+     */
     return danger;
 }
 

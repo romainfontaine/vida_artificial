@@ -13,6 +13,7 @@
 #include "Prey.h"
 #include "Predator.h"
 
+bool Animal::debug = true;
 int Prey::ID_COUNT = 0;
 const double Prey::SQUARED_DIST_SEPARATION = 0.015;
 const double Predator::SQUARED_DIST_EAT = 0.01;
@@ -215,6 +216,16 @@ void timer(int)
     glutTimerFunc(1000 / 30, timer, 0);
 }
 
+void keyboard_handler(unsigned char key, int x, int y)
+{
+    x=x;
+    y=y;
+    if (key == 'd' || key == 'D')
+    {
+        Animal::debug = !Animal::debug;
+    }
+}
+
 int main(int argc, char** argv)
 {
     react.initReact(20, 20, 5);
@@ -251,6 +262,7 @@ int main(int argc, char** argv)
     glutDisplayFunc(renderFunction);
     glEnable(GL_BLEND); // Enable transparency
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glutKeyboardFunc(keyboard_handler);
     timer(0);
     glutMainLoop();
     return 0;
