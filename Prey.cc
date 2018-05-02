@@ -42,7 +42,7 @@ bool Prey::escapePredator(const std::vector<Predator*> &predators,
     bool danger = false;
     for (const Predator* p : predators)
     {
-        if (squaredTorusDistance(*p) < std::pow(0.2, 2))
+        if (squaredTorusDistance(*p) < std::pow(vision, 2))
         {
             auto pos = p->getPosition();
             newDirection.first += x - pos.first;
@@ -131,9 +131,9 @@ std::pair<double, double> Prey::foodMove() const
     int xgrid = (x + 1) / 2 * food->n_food_sites;
     int ygrid = (y + 1) / 2 * food->n_food_sites;
     int maxF = -1, dirX = 0, dirY = 0, minD = 0;
-    for (int i = -vision; i <= vision; i++)
+    for (int i = -vision_int; i <= vision_int; i++)
     {
-        for (int j = -vision; j <= vision; j++)
+        for (int j = -vision_int; j <= vision_int; j++)
         {
             int x = positive_modulo(xgrid + i, food->n_food_sites);
             int y = positive_modulo(ygrid + j, food->n_food_sites);

@@ -12,7 +12,7 @@ class Prey : public Animal {
     static int ID_COUNT;
     static const double SQUARED_DIST_SEPARATION;
 protected:
-    int id, vision;
+    int id, vision_int;
     Food* food;
 public:
 
@@ -20,9 +20,9 @@ public:
         return food;
     }
 
-    Prey(Food* f, const Animal &an, const int &vision = 10)
+    Prey(Food* f, const Animal &an)
     : Animal(an),
-    id(ID_COUNT++), vision(vision), food(f) {
+    id(ID_COUNT++), vision_int(vision * 50), food(f) {
         react = ReactionDiffusion(0.0545, 0.062);
         react.initReact(skin_xinit, skin_yinit, skin_radius);
         genTexture();
@@ -40,10 +40,10 @@ public:
     static Prey* individual(Food* f, const std::vector<Point> *shape) {
         std::random_device rd;
         std::mt19937 gen(rd());
-        std::uniform_int_distribution<> dis_vision(5, 15);
-
+        std::uniform_real_distribution<> dis_vision_c(.1, .25);
         Animal an = Animal::individual(shape);
-        return new Prey(f, an, dis_vision(gen));
+        an.setVision(dis_vision_c(gen));
+        return new Prey(f, an);
     }
 
     void update(const std::vector<Prey*> &preys,
@@ -52,16 +52,6 @@ public:
     unsigned int getFoodStock() {
         return foodStock;
     }
-
-    void draw() {
-        Animal::draw();
-        /*
-        if (Animal::debug) {
-            drawCircle(x, y, .2);
-        }
-         */
-    }
-
 
 private:
 

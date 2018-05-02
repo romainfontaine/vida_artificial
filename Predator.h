@@ -6,12 +6,11 @@
 #include "Prey.h"
 
 class Predator : public Animal {
-    double vision;
     static const double SQUARED_DIST_EAT;
 public:
 
-    Predator(const Animal &an, const double &vision = .7)
-    : Animal(an), vision(vision) {
+    Predator(const Animal &an)
+    : Animal(an) {
         react = ReactionDiffusion(0.034, 0.0618);
         react.initReact(skin_xinit, skin_yinit, skin_radius);
         genTexture();
@@ -38,12 +37,7 @@ public:
     }
 
     static Predator* individual(const std::vector<Point> *shape) {
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_real_distribution<> dis_vision(.5, .7);
-
-        Animal an = Animal::individual(shape);
-        return new Predator(an, dis_vision(gen));
+        return new Predator(Animal::individual(shape));
     }
 
     void update(const std::vector<Prey*> &preys) {

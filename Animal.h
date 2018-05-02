@@ -9,7 +9,7 @@
 class Animal {
 protected:
     const std::vector<Point> *shape;
-    double x, y, vx, vy, vmax, xscale, yscale, perspective;
+    double x, y, vx, vy, vmax, xscale, yscale, perspective, vision;
     int foodStock, metabolism, age, agelimit;
     int skin_xinit, skin_yinit, skin_radius;
     ReactionDiffusion react;
@@ -18,15 +18,17 @@ protected:
     std::shared_ptr<std::atomic<bool>> stop;
 public:
     static bool debug;
+    static bool debug_fov;
     static bool big_textures;
 
     Animal(const std::vector<Point> *shape, const double &x = 0, const double &y = 0,
             const int &foodStock = 200, const int &metabolism = 1,
             const int &agelimit = 1000, const double &vmax = .005,
             const double &xscale = .15, const double&yscale = .15, const double &perspective = 0.,
+            const double &vision = .7,
             const int &skin_xinit = 20, const int &skin_yinit = 20, const int &skin_radius = 2)
     : shape(shape), x(x), y(y), vx(0), vy(0), vmax(vmax), xscale(xscale), yscale(yscale),
-    perspective(perspective), foodStock(foodStock), metabolism(metabolism), age(0), agelimit(agelimit),
+    perspective(perspective), vision(vision), foodStock(foodStock), metabolism(metabolism), age(0), agelimit(agelimit),
     skin_xinit(skin_xinit), skin_yinit(skin_yinit), skin_radius(skin_radius) {
         done = std::shared_ptr < std::atomic<bool>>(new std::atomic<bool>(false));
         stop = std::shared_ptr < std::atomic<bool>>(new std::atomic<bool>(false));
@@ -42,8 +44,9 @@ public:
         std::uniform_real_distribution<> dis_scale(.075, .12);
         std::uniform_real_distribution<> dis_persp(-.15, .15);
         std::normal_distribution<> dis_skin_pos(0, ReactionDiffusion::size);
+        std::uniform_real_distribution<> dis_vision(.5, .7);
         return Animal(shape, 0, 0, 200, dis_meta(gen), dis_age(gen), dis_speed(gen), dis_scale(gen),
-                dis_scale(gen), dis_persp(gen), dis_skin_pos(gen), dis_skin_pos(gen));
+                dis_scale(gen), dis_persp(gen), dis_vision(gen), dis_skin_pos(gen), dis_skin_pos(gen), dis_meta(gen));
     }
 
     const std::vector<Point> * getShape() const {
@@ -53,6 +56,10 @@ public:
     void kill() {
         *stop = true;
         t->join();
+    }
+
+    void setVision(const double &v) {
+        vision = v;
     }
 protected:
 
@@ -161,6 +168,9 @@ public:
             int ttl = foodStock / (float) metabolism;
             displayText(x + .5 * yscale, y - .075, 1, ttl <= 100 ? 0 : 1, ttl <= 100 ? 0 : 1, std::to_string(ttl));
             //displayText(x, y - .1, 1, 1,1, std::to_string(metabolism) + " "+std::to_string(foodStock));
+        }
+        if (Animal::debug_fov) {
+            drawCircle(this->x, y, vision);
         }
     }
 
