@@ -151,10 +151,10 @@ public:
         for (const Point &p : *shape)
             glVertex3d(x + p.x * xscale, y + (p.y + sign(p.y)*(exp(p.x * perspective) - 1)) * yscale, p.z);
         glEnd();
-        int timeRemaining = age/(float)agelimit*100;
-        displayText(x, y-.075, 1, 1, 1, std::to_string(timeRemaining)+"%");
-        int ttl = foodStock/(float)metabolism;
-        displayText(x+.75*yscale, y-.075, 1, 1, 1, std::to_string(ttl));
+        int timeRemaining = age / (float) agelimit * 100;
+        displayText(x, y - .075, 1, timeRemaining >= 85 ? 0 : 1, timeRemaining >= 85 ? 0 : 1, std::to_string(timeRemaining) + "%");
+        int ttl = foodStock / (float) metabolism;
+        displayText(x + .5 * yscale, y - .075, 1, ttl <= 100 ? 0 : 1, ttl <= 100 ? 0 : 1, std::to_string(ttl));
     }
 
     bool consumeEnergy() {
