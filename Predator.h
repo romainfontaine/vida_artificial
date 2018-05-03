@@ -9,7 +9,7 @@ class Predator : public Animal {
     static const double SQUARED_DIST_EAT;
 public:
 
-    Predator(const Animal &an)
+    explicit Predator(const Animal &an)
     : Animal(an) {
         react = ReactionDiffusion(0.034, 0.0618);
         react.initReact(skin_xinit, skin_yinit, skin_radius);

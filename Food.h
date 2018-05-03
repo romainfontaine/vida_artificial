@@ -23,9 +23,11 @@ private:
     int** foodCurrent;
     int** foodSeason;
     int currentSeason = 0;
-    int seasonsNbr;
+    int seasonsNbr = 0;
     int seasonFrames = 0;
     const int seasonDuration = 300;
+
+    Food(const Food &f) = delete;
 
     void setFullCapacity() {
         for (int i = 0; i < n_food_sites; i++) {
@@ -65,7 +67,7 @@ public:
         foodCurrent[x][y] = -300;
     }
 
-    Food(const int &n_food_sites) : n_food_sites(n_food_sites) {
+    explicit Food(const int &n_food_sites) : n_food_sites(n_food_sites) {
         foodCapacity = new int*[n_food_sites];
         foodCurrent = new int*[n_food_sites];
         foodSeason = new int*[n_food_sites];

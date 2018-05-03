@@ -8,7 +8,7 @@ class TurtleInterpreter {
 public:
     std::vector<Turtle> ts;
 
-    TurtleInterpreter(const Turtle &t) {
+    explicit TurtleInterpreter(const Turtle &t) {
         ts.push_back(t);
     };
 

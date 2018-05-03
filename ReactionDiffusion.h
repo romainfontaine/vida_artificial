@@ -20,7 +20,7 @@ public:
 private:
     float u[2][size][size] = {};
     float v[2][size][size] = {};
-    unsigned char texture[size * size * 3];
+    unsigned char texture[size * size * 3] = {};
     int current = 0;
 
     float F, k;

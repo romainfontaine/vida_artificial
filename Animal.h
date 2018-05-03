@@ -29,9 +29,8 @@ public:
             const int &skin_xinit = 20, const int &skin_yinit = 20, const int &skin_radius = 2)
     : shape(shape), x(x), y(y), vx(0), vy(0), vmax(vmax), xscale(xscale), yscale(yscale),
     perspective(perspective), vision(vision), foodStock(foodStock), metabolism(metabolism), age(0), agelimit(agelimit),
-    skin_xinit(skin_xinit), skin_yinit(skin_yinit), skin_radius(skin_radius) {
-        done = std::shared_ptr < std::atomic<bool>>(new std::atomic<bool>(false));
-        stop = std::shared_ptr < std::atomic<bool>>(new std::atomic<bool>(false));
+    skin_xinit(skin_xinit), skin_yinit(skin_yinit), skin_radius(skin_radius),
+    done(new std::atomic<bool>(false)), stop(new std::atomic<bool>(false)) {
 
     }
 
@@ -160,7 +159,7 @@ public:
         glColor3d(1., 1., 1.);
         glBegin(GL_LINE_LOOP);
         for (const Point &p : *shape)
-            glVertex3d(x + p.x * xscale, y + (p.y + sign(p.y)*(exp(p.x * perspective) - 1)) * yscale, p.z);
+            glVertex3d(x + p.x * xscale, y + (p.y + sign(p.y) * expm1(p.x * perspective)) * yscale, p.z);
         glEnd();
         if (Animal::debug) {
             int timeRemaining = age / (float) agelimit * 100;
