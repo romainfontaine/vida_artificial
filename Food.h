@@ -18,29 +18,36 @@ class Food {
 public:
     const int n_food_sites;
 private:
-    int maxCapacity = 8;
+    const int maxCapacity = 8;
     int** foodCapacity;
     int** foodCurrent;
+    int** foodSeason;
+    int currentSeason = 0;
+    int seasonsNbr;
+    int seasonFrames = 0;
+    const int seasonDuration = 300;
 
     void setFullCapacity() {
         for (int i = 0; i < n_food_sites; i++) {
             for (int j = 0; j < n_food_sites; j++) {
-                foodCurrent[i][j] = foodCapacity[i][j];
+                if (currentSeason == foodSeason[i][j])
+                    foodCurrent[i][j] = foodCapacity[i][j];
             }
         }
     }
 
-    void addSand(const int &x, const int &y) {
+    void addSand(const int &x, const int &y, const int &k) {
 
         if (x < 0 || y < 0 || x >= n_food_sites || y >= n_food_sites)
             return;
+        foodSeason[x][y] = k;
         foodCapacity[x][y]++;
         if (foodCapacity[x][y] >= 4) {
             foodCapacity[x][y] = 0;
-            addSand(x + 1, y);
-            addSand(x - 1, y);
-            addSand(x, y + 1);
-            addSand(x, y - 1);
+            addSand(x + 1, y, k);
+            addSand(x - 1, y, k);
+            addSand(x, y + 1, k);
+            addSand(x, y - 1, k);
         }
     }
 
@@ -61,12 +68,15 @@ public:
     Food(const int &n_food_sites) : n_food_sites(n_food_sites) {
         foodCapacity = new int*[n_food_sites];
         foodCurrent = new int*[n_food_sites];
+        foodSeason = new int*[n_food_sites];
         for (int i = 0; i < n_food_sites; i++) {
             foodCapacity[i] = new int[n_food_sites];
             foodCurrent[i] = new int[n_food_sites];
+            foodSeason[i] = new int[n_food_sites];
             for (int j = 0; j < n_food_sites; j++) {
                 foodCapacity[i][j] = 0;
                 foodCurrent[i][j] = 0;
+                foodSeason[i][j] = -1;
             }
         }
     }
@@ -75,15 +85,18 @@ public:
         for (int i = 0; i < n_food_sites; i++) {
             delete[] foodCapacity[i];
             delete[] foodCurrent[i];
+            delete[] foodSeason[i];
         }
         delete[] foodCapacity;
         delete[] foodCurrent;
+        delete[] foodSeason;
     }
 
     void generateFoodSandpile(unsigned int food_sites[][3], unsigned int n) {
+        seasonsNbr = n;
         for (unsigned int k = 0; k < n; k++) {
             for (unsigned int l = 0; l < food_sites[k][2]; l++) {
-                addSand(food_sites[k][0], food_sites[k][1]);
+                addSand(food_sites[k][0], food_sites[k][1], k);
             }
         }
         for (int i = 0; i < n_food_sites; i++) {
@@ -95,9 +108,18 @@ public:
     }
 
     void regenerateFood() {
+        if (seasonFrames++>seasonDuration) {
+            seasonFrames = 0;
+            currentSeason++;
+            currentSeason %= seasonsNbr;
+        }
         for (int i = 0; i < n_food_sites; i++) {
             for (int j = 0; j < n_food_sites; j++) {
-                foodCurrent[i][j] = std::min(foodCurrent[i][j] + 1, foodCapacity[i][j]);
+                if (currentSeason == foodSeason[i][j]) {
+                    foodCurrent[i][j] = std::min(foodCurrent[i][j] + 1, foodCapacity[i][j]);
+                } else if (foodSeason[i][j] != -1 && foodCurrent[i][j] < 0) {
+                    foodCurrent[i][j] = -100;
+                }
             }
         }
     }
@@ -111,7 +133,12 @@ public:
                 if (foodCurrent[i][j] < 1) {
                     continue;
                 }
-                glColor4d(46. / 255, 204. / 255, 113. / 255, .3 + ((double) foodCurrent[i][j]) / maxCapacity / 3. * 2.);
+
+                if (currentSeason == foodSeason[i][j])
+                    glColor4d(46. / 255, 204. / 255, 113. / 255, .3 + ((double) foodCurrent[i][j]) / maxCapacity / 3. * 2.);
+                else
+                    glColor4d(245. / 255, 215. / 255, 110. / 255, .3 + ((double) foodCurrent[i][j]) / maxCapacity / 3. * 2.);
+
                 glBegin(GL_TRIANGLES);
 
                 glVertex2d(x + food_site_size / 6, y + food_site_size / 6);
