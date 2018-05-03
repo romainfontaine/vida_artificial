@@ -116,7 +116,7 @@ static std::vector<Predator*> predators;
 #include "ReactionDiffusion.h"
 ReactionDiffusion react(0.034, 0.0618); //(0.0353, .0566);
 
-void texture(unsigned char* texDat, unsigned int tw, unsigned int th,
+void texture(const unsigned char* texDat, unsigned int tw, unsigned int th,
         double x = 0, double y = 0, double w = 1, double h = 1)
 {
     // Source: https://stackoverflow.com/a/24266568/4384857
@@ -206,7 +206,8 @@ void renderFunction()
     for (int i = 0; i < 5; i++)
         react.iterate();
 
-    //texture(react.toUCharArray(), react.getSize(), react.getSize(), -.5, -.5, 1, 1);
+
+    //react.generateUCharArray();texture(react.toUCharArray(), react.getSize(), react.getSize(), -.5, -.5, 1, 1);
 
     glFlush();
 }

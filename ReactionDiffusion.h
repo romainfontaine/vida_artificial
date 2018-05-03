@@ -36,7 +36,7 @@ private:
                 .05 * (m[(i + 1) % size][(j + 1) % size] +
                 m[(i - 1 + size) % size][(j + 1) % size] +
                 m[(i - 1 + size) % size][(j - 1 + size) % size] +
-                m[(i + 1) % size][(j - 1) % size]);
+                m[(i + 1) % size][(j - 1 + size) % size]);
     }
 
 public:
