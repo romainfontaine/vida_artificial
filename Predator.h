@@ -21,16 +21,18 @@ public:
             if (squaredTorusDistance(*preys[i]) < SQUARED_DIST_EAT) {
                 foodStock += preys[i]->getFoodStock();
                 preys[i]->kill();
-                Food* f = preys[i]->getFood();
-                auto s = preys[i]->getShape();
+                //Food* f = preys[i]->getFood();
+                //auto s = preys[i]->getShape();
                 delete preys[i];
 
-                std::random_device rd;
+                preys.erase(preys.begin() + i);
+                /*std::random_device rd;
                 std::default_random_engine re(rd());
                 std::uniform_real_distribution<double> unif(-1, 1);
                 preys[i] = Prey::individual(f, s);
                 preys[i]->setPosition(unif(re), unif(re));
                 //preys.erase(preys.begin() + i);
+                 */
                 break;
             }
         }
@@ -41,7 +43,7 @@ public:
     }
 
     void update(const std::vector<Prey*> &preys) {
-        std::pair<double, double> c = foodStock/(float)metabolism<=300 ? moveToFood(preys) : std::pair<double, double>{0, 0};
+        std::pair<double, double> c = foodStock / (float) metabolism <= 300 ? moveToFood(preys) : std::pair<double, double>{0, 0};
         const double threshold = .0000000001;
         if (std::abs(c.first) < threshold && std::abs(c.second) < threshold &&
                 std::abs(vx) < threshold && std::abs(vy) < threshold) {

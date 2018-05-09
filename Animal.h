@@ -8,10 +8,12 @@
 
 class Animal {
 protected:
+    static const int INIT_FOOD_AMOUNT = 300;
     const std::vector<Point> *shape;
     double x, y, vx, vy, vmax, xscale, yscale, perspective, vision;
     int foodStock, metabolism, age, agelimit;
     int skin_xinit, skin_yinit, skin_radius;
+    bool sex;
     ReactionDiffusion react;
     std::shared_ptr<std::thread> t;
     std::shared_ptr<std::atomic<bool>> done;
@@ -22,14 +24,15 @@ public:
     static bool big_textures;
 
     Animal(const std::vector<Point> *shape, const double &x = 0, const double &y = 0,
-            const int &foodStock = 200, const int &metabolism = 1,
+            const int &foodStock = INIT_FOOD_AMOUNT, const int &metabolism = 1,
             const int &agelimit = 1000, const double &vmax = .005,
             const double &xscale = .15, const double&yscale = .15, const double &perspective = 0.,
             const double &vision = .7,
-            const int &skin_xinit = 20, const int &skin_yinit = 20, const int &skin_radius = 2)
+            const int &skin_xinit = 20, const int &skin_yinit = 20, const int &skin_radius = 2,
+            const bool &sex = true)
     : shape(shape), x(x), y(y), vx(0), vy(0), vmax(vmax), xscale(xscale), yscale(yscale),
     perspective(perspective), vision(vision), foodStock(foodStock), metabolism(metabolism), age(0), agelimit(agelimit),
-    skin_xinit(skin_xinit), skin_yinit(skin_yinit), skin_radius(skin_radius),
+    skin_xinit(skin_xinit), skin_yinit(skin_yinit), skin_radius(skin_radius), sex(sex),
     done(new std::atomic<bool>(false)), stop(new std::atomic<bool>(false)) {
 
     }
@@ -38,14 +41,47 @@ public:
         std::random_device rd;
         std::mt19937 gen(rd());
         std::uniform_int_distribution<> dis_meta(1, 3);
+        std::uniform_int_distribution<> dis_bool(0, 2);
         std::normal_distribution<> dis_age(1000, 100);
         std::uniform_real_distribution<> dis_speed(.001, .006);
         std::uniform_real_distribution<> dis_scale(.075, .12);
         std::uniform_real_distribution<> dis_persp(-.15, .15);
         std::normal_distribution<> dis_skin_pos(0, ReactionDiffusion::size);
         std::uniform_real_distribution<> dis_vision(.5, .7);
-        return Animal(shape, 0, 0, 200, dis_meta(gen), dis_age(gen), dis_speed(gen), dis_scale(gen),
-                dis_scale(gen), dis_persp(gen), dis_vision(gen), dis_skin_pos(gen), dis_skin_pos(gen), dis_meta(gen));
+        return Animal(shape, 0, 0, INIT_FOOD_AMOUNT, dis_meta(gen), dis_age(gen), dis_speed(gen), dis_scale(gen),
+                dis_scale(gen), dis_persp(gen), dis_vision(gen), dis_skin_pos(gen), dis_skin_pos(gen), dis_meta(gen), dis_bool(gen) == 1);
+    }
+
+    Animal crossoverMutation(const Animal &o) const {
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::normal_distribution<> mut(0, 1);
+        std::uniform_real_distribution<> dis_crossover(0, 1);
+        std::uniform_int_distribution<> dis_bool(0, 2);
+
+        float b_meta = dis_crossover(gen),
+                b_age = dis_crossover(gen),
+                b_speed = dis_crossover(gen),
+                b_xscale = dis_crossover(gen),
+                b_yscale = dis_crossover(gen),
+                b_persp = dis_crossover(gen),
+                b_vision = dis_crossover(gen),
+                b_skinx = dis_crossover(gen),
+                b_skiny = dis_crossover(gen),
+                b_skinr = dis_crossover(gen);
+
+        return Animal(shape, 0, 0, INIT_FOOD_AMOUNT,
+                b_meta * metabolism + (1 - b_meta) * o.metabolism + mut(gen),
+                b_age * agelimit + (1 - b_age) * o.agelimit + mut(gen),
+                b_speed * vmax + (1 - b_speed) * o.vmax + mut(gen),
+                b_xscale * xscale + (1 - b_xscale) * o.xscale + mut(gen)*.1,
+                b_yscale * yscale + (1 - b_yscale) * o.yscale + mut(gen)*.1,
+                b_persp * perspective + (1 - b_persp) * o.perspective + mut(gen),
+                b_vision * vision + (1 - b_vision) * o.vision + mut(gen),
+                b_skinx * skin_xinit + (1 - b_skinx) * o.skin_xinit + mut(gen),
+                b_skiny * skin_yinit + (1 - b_skiny) * o.skin_yinit + mut(gen),
+                b_skinr * skin_radius + (1 - b_skinr) * o.skin_radius + mut(gen),
+                dis_bool(gen) == 1);
     }
 
     const std::vector<Point> * getShape() const {
@@ -163,9 +199,10 @@ public:
         glEnd();
         if (Animal::debug) {
             int timeRemaining = age / (float) agelimit * 100;
-            displayText(x, y - .075, 1, timeRemaining >= 85 ? 0 : 1, timeRemaining >= 85 ? 0 : 1, std::to_string(timeRemaining) + "%");
+            displayText(x, y - .075, 1, 1, 1, sex ? "M" : "F");
+            displayText(x + .3 * yscale, y - .075, 1, timeRemaining >= 85 ? 0 : 1, timeRemaining >= 85 ? 0 : 1, std::to_string(timeRemaining) + "%");
             int ttl = foodStock / (float) metabolism;
-            displayText(x + .5 * yscale, y - .075, 1, ttl <= 100 ? 0 : 1, ttl <= 100 ? 0 : 1, std::to_string(ttl));
+            displayText(x + .8 * yscale, y - .075, 1, ttl <= 100 ? 0 : 1, ttl <= 100 ? 0 : 1, std::to_string(ttl));
             //displayText(x, y - .1, 1, 1,1, std::to_string(metabolism) + " "+std::to_string(foodStock));
         }
         if (Animal::debug_fov) {

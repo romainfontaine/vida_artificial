@@ -177,12 +177,14 @@ void renderFunction()
         preys[i]->update(preys, predators);
         if (!preys[i]->consumeEnergy())
         {
-            std::cout << *preys[i] << std::endl;
             preys[i]->kill();
             delete preys[i];
-            preys[i] = Prey::individual(&food, &fish2);
-            preys[i]->setPosition(unif(re), unif(re));
+            preys.erase(preys.begin() + i);
+            continue;
+            //preys[i] = Prey::individual(&food, &fish2);
+            //preys[i]->setPosition(unif(re), unif(re));
         }
+        preys[i]->reproduce(preys);
         preys[i]->draw();
     }
     for (unsigned int i = 0; i < predators.size(); i++)
