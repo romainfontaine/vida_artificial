@@ -8,7 +8,7 @@
 
 class Animal {
 protected:
-    static const int INIT_FOOD_AMOUNT = 300;
+    static const int INIT_FOOD_AMOUNT;
     const std::vector<Point> *shape;
     double x, y, vx, vy, vmax, xscale, yscale, perspective, vision;
     int foodStock, metabolism, age, agelimit;
@@ -30,18 +30,30 @@ public:
             const double &vision = .7,
             const int &skin_xinit = 20, const int &skin_yinit = 20, const int &skin_radius = 2,
             const bool &sex = true)
-    : shape(shape), x(x), y(y), vx(0), vy(0), vmax(vmax), xscale(xscale), yscale(yscale),
-    perspective(perspective), vision(vision), foodStock(foodStock), metabolism(metabolism), age(0), agelimit(agelimit),
-    skin_xinit(skin_xinit), skin_yinit(skin_yinit), skin_radius(skin_radius), sex(sex),
+    : shape(shape), x(x), y(y), vx(0), vy(0), vmax(clamp(vmax, .001, .006)),
+    xscale(clamp(xscale, .075, .12)), yscale(clamp(yscale, .075, .12)),
+    perspective(clamp(perspective, -.15, .15)), vision(clamp(vision, .5, .7)),
+    foodStock(foodStock), metabolism(clamp(metabolism, 1, 2)), age(0),
+    agelimit(clamp(agelimit, 600, 1400)),
+    skin_xinit(clamp(skin_xinit, 0, 1)), skin_yinit(clamp(skin_yinit, 0, 1)),
+    skin_radius(clamp(skin_radius, 1, 2)), sex(sex),
     done(new std::atomic<bool>(false)), stop(new std::atomic<bool>(false)) {
+    }
 
+    friend std::ostream& operator<<(std::ostream& s, const Animal& b) {
+        return s << "Animal" << // " | pos=" << b.x << "," << b.y <<
+                " vmax=" << b.vmax << " xscale=" << b.xscale << " yscale=" <<
+                b.yscale << " perspective=" << b.perspective <<
+                " foodStock=" << b.foodStock << " metabolism=" << b.metabolism <<
+                " age=" << b.age << " agelimit=" << b.agelimit << " vision=" <<
+                b.vision;
     }
 
     static Animal individual(const std::vector<Point> *shape) {
         std::random_device rd;
         std::mt19937 gen(rd());
-        std::uniform_int_distribution<> dis_meta(1, 3);
-        std::uniform_int_distribution<> dis_bool(0, 2);
+        std::uniform_int_distribution<> dis_meta(1, 2);
+        std::uniform_int_distribution<> dis_bool(0, 1);
         std::normal_distribution<> dis_age(1000, 100);
         std::uniform_real_distribution<> dis_speed(.001, .006);
         std::uniform_real_distribution<> dis_scale(.075, .12);
@@ -52,12 +64,34 @@ public:
                 dis_scale(gen), dis_persp(gen), dis_vision(gen), dis_skin_pos(gen), dis_skin_pos(gen), dis_meta(gen), dis_bool(gen) == 1);
     }
 
+    template<class T>
+    void reproduce(std::vector<T*> &preys) {
+        const int minTTLToReproduce = 500;
+        const int reproduceCost = 170;
+        const int min_reprod_age = 200;
+        if (foodStock / metabolism < minTTLToReproduce || age < min_reprod_age)
+            return;
+        for (T *p : preys) {
+            if (sex != p->sex && p->age >= min_reprod_age &&
+                    p->foodStock / p->metabolism >= minTTLToReproduce &&
+                    squaredTorusDistance(*p) <= vision * vision) {
+                preys.push_back((T*) ((T*)this)->T::crossoverMutation(*p));
+                double nx = (p->x - x) / 2 + p->x;
+                double ny = (p->y - y) / 2 + p->y;
+                preys.back()->setPosition(nx, ny);
+                std::cout << *preys.back() << std::endl;
+                foodStock -= reproduceCost;
+                p->foodStock -= reproduceCost;
+            }
+        }
+    }
+
     Animal crossoverMutation(const Animal &o) const {
         std::random_device rd;
         std::mt19937 gen(rd());
         std::normal_distribution<> mut(0, 1);
         std::uniform_real_distribution<> dis_crossover(0, 1);
-        std::uniform_int_distribution<> dis_bool(0, 2);
+        std::uniform_int_distribution<> dis_bool(0, 1);
 
         float b_meta = dis_crossover(gen),
                 b_age = dis_crossover(gen),
@@ -73,14 +107,14 @@ public:
         return Animal(shape, 0, 0, INIT_FOOD_AMOUNT,
                 b_meta * metabolism + (1 - b_meta) * o.metabolism + mut(gen),
                 b_age * agelimit + (1 - b_age) * o.agelimit + mut(gen),
-                b_speed * vmax + (1 - b_speed) * o.vmax + mut(gen),
+                b_speed * vmax + (1 - b_speed) * o.vmax + mut(gen)*.1,
                 b_xscale * xscale + (1 - b_xscale) * o.xscale + mut(gen)*.1,
                 b_yscale * yscale + (1 - b_yscale) * o.yscale + mut(gen)*.1,
-                b_persp * perspective + (1 - b_persp) * o.perspective + mut(gen),
+                b_persp * perspective + (1 - b_persp) * o.perspective + mut(gen)*.1,
                 b_vision * vision + (1 - b_vision) * o.vision + mut(gen),
-                b_skinx * skin_xinit + (1 - b_skinx) * o.skin_xinit + mut(gen),
-                b_skiny * skin_yinit + (1 - b_skiny) * o.skin_yinit + mut(gen),
-                b_skinr * skin_radius + (1 - b_skinr) * o.skin_radius + mut(gen),
+                b_skinx * skin_xinit + (1 - b_skinx) * o.skin_xinit + mut(gen)*.1,
+                b_skiny * skin_yinit + (1 - b_skiny) * o.skin_yinit + mut(gen)*.1,
+                b_skinr * skin_radius + (1 - b_skinr) * o.skin_radius + mut(gen)*.1,
                 dis_bool(gen) == 1);
     }
 

@@ -43,5 +43,10 @@ inline void drawCircle(const float &x, const float &y, const float &r,
     glEnd();
 }
 
+template<class T>
+inline T clamp(const T &a,const T &min, const T &max){
+    return std::max(min, std::min(a, max));
+}
+
 #endif /* TOOLS_H */
 

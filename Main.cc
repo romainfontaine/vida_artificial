@@ -16,9 +16,12 @@
 bool Animal::debug = true;
 bool Animal::debug_fov = false;
 bool Animal::big_textures = false;
+const int Animal::INIT_FOOD_AMOUNT = 300;
 int Prey::ID_COUNT = 0;
 const double Prey::SQUARED_DIST_SEPARATION = 0.015;
 const double Predator::SQUARED_DIST_EAT = 0.01;
+const int N_PREYS = 25;
+const int N_PREDATORS = 5;
 
 static std::vector<Point> fish1{
     {0.0625, -0.0692307692, 1},
@@ -195,9 +198,12 @@ void renderFunction()
         {
             predators[i]->kill();
             delete predators[i];
-            predators[i] = Predator::individual(&fish1);
-            predators[i]->setPosition(unif(re), unif(re));
+            predators.erase(predators.begin() + i);
+            continue;
+            //predators[i] = Predator::individual(&fish1);
+            //predators[i]->setPosition(unif(re), unif(re));
         }
+        predators[i]->reproduce(predators);
         predators[i]->draw();
     }
     food.regenerateFood();
@@ -239,9 +245,9 @@ int main(int argc, char** argv)
 
     // X, Y, QTY
     unsigned int food_sites_sp[][3] = {
-        {25, 15, 1000},
-        {50, 50, 2000},
-        {80, 35, 1000},
+        {50, 65, 3500},
+        {80, 35, 1500},
+        {25, 15, 2000},
     };
     food.generateFoodSandpile(food_sites_sp, sizeof (food_sites_sp) / sizeof (int) / 3);
 
@@ -250,12 +256,12 @@ int main(int argc, char** argv)
     std::default_random_engine re(rd());
 
     std::uniform_real_distribution<double> unif(-1, 1);
-    for (int i = 0; i < 15; i++)
+    for (int i = 0; i < N_PREYS; i++)
     {
         preys.push_back(Prey::individual(&food, &fish2));
         preys.back()->setPosition(unif(re), unif(re));
     }
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < N_PREDATORS; i++)
     {
         predators.push_back(Predator::individual(&fish1));
         predators.back()->setPosition(unif(re), unif(re));

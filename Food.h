@@ -18,7 +18,7 @@ class Food {
 public:
     const int n_food_sites;
 private:
-    const int maxCapacity = 20;
+    const int maxCapacity = 16;
     int** foodCapacity;
     int** foodCurrent;
     int** foodSeason;

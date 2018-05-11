@@ -28,15 +28,6 @@ public:
         genTexture();
     }
 
-    friend std::ostream& operator<<(std::ostream& s, const Prey& b) {
-        return s << "Prey #" << b.id << " | pos={" << b.x << "," << b.y <<
-                "} vmax=" << b.vmax << " xscale=" << b.xscale << " yscale=" <<
-                b.yscale << " perspective=" << b.perspective << " id=" << b.id <<
-                " foodStock=" << b.foodStock << " metabolism=" << b.metabolism <<
-                " age=" << b.age << " agelimit=" << b.agelimit << " vision=" <<
-                b.vision;
-    }
-
     static Prey* individual(Food* f, const std::vector<Point> *shape) {
         std::random_device rd;
         std::mt19937 gen(rd());
@@ -54,29 +45,9 @@ public:
     }
 
     Prey* crossoverMutation(const Prey &o) const {
+        std::cout << "Reproduced prey" << std::endl;
         Animal a = Animal::crossoverMutation(o);
         return new Prey(food, a);
-    }
-
-    void reproduce(std::vector<Prey*> &preys) {
-        const int minTTLToReproduce = 500;
-        const int reproduceCost = 170;
-        const int min_reprod_age = 200;
-        if (foodStock / metabolism < minTTLToReproduce || age < min_reprod_age)
-            return;
-        for (Prey *p : preys) {
-            if (sex != p->sex && p->age >= min_reprod_age &&
-                    p->foodStock / p->metabolism >= minTTLToReproduce &&
-                    squaredTorusDistance(*p) <= vision * vision) {
-                preys.push_back(crossoverMutation(*p));
-                double nx = (p->x - x) / 2 + p->x;
-                double ny = (p->y - y) / 2 + p->y;
-                preys.back()->setPosition(nx, ny);
-                foodStock -= reproduceCost;
-                p->foodStock -= reproduceCost;
-                std::cout << "reproduced :)" << std::endl;
-            }
-        }
     }
 
 private:
