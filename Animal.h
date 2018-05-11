@@ -20,7 +20,27 @@ protected:
     std::shared_ptr<std::thread> t;
     std::shared_ptr<std::atomic<bool>> done;
     std::shared_ptr<std::atomic<bool>> stop;
+    std::map<Animal*, bool> can_reproduce;
 public:
+
+    bool compareSkin(Animal* a) {
+        if (!done || !a->done)
+            return false;
+        if (can_reproduce.find(a) != can_reproduce.end()) {
+            return can_reproduce[a];
+        }
+        double diff = 0;
+        for (int i = 0; i < ReactionDiffusion::size; i++) {
+            for (int j = 0; j < ReactionDiffusion::size; j++) {
+                diff += std::abs(react.getV(i, j) - a->react.getV(i, j));
+            }
+        }
+        std::cout << diff << std::endl;
+        bool v = diff < 200.;
+        return (can_reproduce[a] = v);
+    }
+
+
     static bool debug;
     static bool debug_fov;
     static bool big_textures;
@@ -76,7 +96,7 @@ public:
         for (T *p : preys) {
             if (sex != p->sex && p->age >= min_reprod_age &&
                     p->foodStock / p->metabolism >= minTTLToReproduce &&
-                    squaredTorusDistance(*p) <= vision * vision) {
+                    squaredTorusDistance(*p) <= vision * vision && compareSkin(p)) {
                 preys.push_back((T*) ((T*)this)->T::crossoverMutation(*p));
                 double nx = (p->x - x) / 2 + p->x;
                 double ny = (p->y - y) / 2 + p->y;
@@ -139,6 +159,7 @@ public:
         vision = v;
     }
 protected:
+
     template<class T>
     std::pair<double, double> separation(const std::vector<T*> &predators) const {
         double sx = 0, sy = 0;

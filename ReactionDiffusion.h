@@ -41,6 +41,10 @@ private:
 
 public:
 
+    inline double getV(const int &x, const int &y) const {
+        return v[current][x][y];
+    }
+
     ReactionDiffusion(float F = 0.0545, float k = 0.062) : F(F), k(k) {
 
     }
