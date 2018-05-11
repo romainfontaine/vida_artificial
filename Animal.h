@@ -34,8 +34,8 @@ public:
     xscale(clamp(xscale, .075, .12)), yscale(clamp(yscale, .075, .12)),
     perspective(clamp(perspective, -.15, .15)), vision(clamp(vision, .5, .7)),
     foodStock(foodStock), metabolism(clamp(metabolism, 1, 2)), age(0),
-    agelimit(clamp(agelimit, 600, 1400)),
-    skin_xinit(clamp(skin_xinit, 0, 1)), skin_yinit(clamp(skin_yinit, 0, 1)),
+    agelimit(clamp(agelimit, 1500, 2500)),
+    skin_xinit(clamp(skin_xinit, 0, ReactionDiffusion::size)), skin_yinit(clamp(skin_yinit, 0, ReactionDiffusion::size)),
     skin_radius(clamp(skin_radius, 1, 2)), sex(sex),
     done(new std::atomic<bool>(false)), stop(new std::atomic<bool>(false)) {
     }
@@ -46,7 +46,7 @@ public:
                 b.yscale << " perspective=" << b.perspective <<
                 " foodStock=" << b.foodStock << " metabolism=" << b.metabolism <<
                 " age=" << b.age << " agelimit=" << b.agelimit << " vision=" <<
-                b.vision;
+                b.vision << " skin_xinit=" << b.skin_xinit;
     }
 
     static Animal individual(const std::vector<Point> *shape) {
@@ -54,7 +54,7 @@ public:
         std::mt19937 gen(rd());
         std::uniform_int_distribution<> dis_meta(1, 2);
         std::uniform_int_distribution<> dis_bool(0, 1);
-        std::normal_distribution<> dis_age(1000, 100);
+        std::normal_distribution<> dis_age(2000, 300);
         std::uniform_real_distribution<> dis_speed(.001, .006);
         std::uniform_real_distribution<> dis_scale(.075, .12);
         std::uniform_real_distribution<> dis_persp(-.15, .15);
@@ -111,9 +111,9 @@ public:
                 b_xscale * xscale + (1 - b_xscale) * o.xscale + mut(gen)*.1,
                 b_yscale * yscale + (1 - b_yscale) * o.yscale + mut(gen)*.1,
                 b_persp * perspective + (1 - b_persp) * o.perspective + mut(gen)*.1,
-                b_vision * vision + (1 - b_vision) * o.vision + mut(gen),
-                b_skinx * skin_xinit + (1 - b_skinx) * o.skin_xinit + mut(gen)*.1,
-                b_skiny * skin_yinit + (1 - b_skiny) * o.skin_yinit + mut(gen)*.1,
+                b_vision * vision + (1 - b_vision) * o.vision + mut(gen)*.1,
+                b_skinx * (float)skin_xinit + (1 - b_skinx) * (float)o.skin_xinit + mut(gen)*.1,
+                b_skiny * (float)skin_yinit + (1 - b_skiny) * (float)o.skin_yinit + mut(gen)*.1,
                 b_skinr * skin_radius + (1 - b_skinr) * o.skin_radius + mut(gen)*.1,
                 dis_bool(gen) == 1);
     }
