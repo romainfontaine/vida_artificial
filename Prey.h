@@ -10,7 +10,6 @@ class Predator;
 class Prey : public Animal {
     // Source for basic boid rules: http://www.kfish.org/boids/pseudocode.html
     static int ID_COUNT;
-    static const double SQUARED_DIST_SEPARATION;
 protected:
     int id, vision_int;
     Food* food;
@@ -58,8 +57,6 @@ private:
     void eatFood();
 
     std::pair<double, double> cohesion(const std::vector<Prey*> &preys) const;
-
-    std::pair<double, double> separation(const std::vector<Prey*> &preys) const;
 
     std::pair<double, double> alignment(const std::vector<Prey*> &preys) const;
 

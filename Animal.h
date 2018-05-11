@@ -5,9 +5,11 @@
 #include <memory>
 #include "ReactionDiffusion.h"
 #include "Tools.h"
+#include "Food.h"
 
 class Animal {
 protected:
+    static const double SQUARED_DIST_SEPARATION;
     static const int INIT_FOOD_AMOUNT;
     const std::vector<Point> *shape;
     double x, y, vx, vy, vmax, xscale, yscale, perspective, vision;
@@ -112,8 +114,8 @@ public:
                 b_yscale * yscale + (1 - b_yscale) * o.yscale + mut(gen)*.1,
                 b_persp * perspective + (1 - b_persp) * o.perspective + mut(gen)*.1,
                 b_vision * vision + (1 - b_vision) * o.vision + mut(gen)*.1,
-                b_skinx * (float)skin_xinit + (1 - b_skinx) * (float)o.skin_xinit + mut(gen)*.1,
-                b_skiny * (float)skin_yinit + (1 - b_skiny) * (float)o.skin_yinit + mut(gen)*.1,
+                b_skinx * (float) skin_xinit + (1 - b_skinx) * (float) o.skin_xinit + mut(gen)*.1,
+                b_skiny * (float) skin_yinit + (1 - b_skiny) * (float) o.skin_yinit + mut(gen)*.1,
                 b_skinr * skin_radius + (1 - b_skinr) * o.skin_radius + mut(gen)*.1,
                 dis_bool(gen) == 1);
     }
@@ -122,8 +124,14 @@ public:
         return shape;
     }
 
-    void kill() {
+    void kill(Food *f = NULL) {
         *stop = true;
+        if (f != NULL) {
+            int x = (this->x + 1) / 2. * f->n_food_sites, y = (this->y + 1) / 2. * f->n_food_sites;
+            std::cout << x << " " << y << std::endl;
+            for (int i = 0; i < foodStock; i++)
+                f->addFood(x, y);
+        }
         t->join();
     }
 
@@ -131,6 +139,19 @@ public:
         vision = v;
     }
 protected:
+    template<class T>
+    std::pair<double, double> separation(const std::vector<T*> &predators) const {
+        double sx = 0, sy = 0;
+        for (const T* b : predators) {
+            if (b == this)
+                continue;
+            if (squaredTorusDistance(*b) < T::SQUARED_DIST_SEPARATION) {
+                sx -= b->x - x;
+                sy -= b->y - y;
+            }
+        }
+        return std::make_pair(sx, sy);
+    }
 
     void genTexture() {
         t = std::shared_ptr<std::thread>(new std::thread(&Animal::gen, this));

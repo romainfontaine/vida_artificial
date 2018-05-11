@@ -95,22 +95,6 @@ std::pair<double, double> Prey::cohesion(const std::vector<Prey*> &preys) const
     return std::make_pair(sx / 100, sy / 100);
 }
 
-std::pair<double, double> Prey::separation(const std::vector<Prey*> &preys) const
-{
-    double sx = 0, sy = 0;
-    for (const Prey* b : preys)
-    {
-        if (b->id == id)
-            continue;
-        if (squaredTorusDistance(*b) < SQUARED_DIST_SEPARATION)
-        {
-            sx -= b->x - x;
-            sy -= b->y - y;
-        }
-    }
-    return std::make_pair(sx, sy);
-}
-
 std::pair<double, double> Prey::alignment(const std::vector<Prey*> &preys) const
 {
     double sx = 0, sy = 0;

@@ -48,7 +48,7 @@ public:
         return new Predator(Animal::individual(shape));
     }
 
-    void update(const std::vector<Prey*> &preys) {
+    void update(const std::vector<Prey*> &preys, const std::vector<Predator*> &preds) {
         std::pair<double, double> c = foodStock / (float) metabolism <= 300 ? moveToFood(preys) : std::pair<double, double>{0, 0};
         const double threshold = .0000000001;
         if (std::abs(c.first) < threshold && std::abs(c.second) < threshold &&
@@ -59,8 +59,9 @@ public:
             vx = unif(re);
             vy = unif(re);
         } else {
-            vx += c.first;
-            vy += c.second;
+            auto s = separation(preds);
+            vx += c.first + s.first;
+            vy += c.second + s.second;
         }
         updatePosition_NormalizeSpeed();
     }

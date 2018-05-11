@@ -39,7 +39,6 @@ private:
     }
 
     void addSand(const int &x, const int &y, const int &k) {
-
         if (x < 0 || y < 0 || x >= n_food_sites || y >= n_food_sites)
             return;
         foodSeason[x][y] = k;
@@ -54,6 +53,19 @@ private:
     }
 
 public:
+
+    void addFood(const int &x, const int &y) {
+        if (x < 0 || y < 0 || x >= n_food_sites || y >= n_food_sites)
+            return;
+        foodCurrent[x][y]++;
+        if (foodCurrent[x][y] >= 4) {
+            foodCurrent[x][y] = 0;
+            addFood(x + 1, y);
+            addFood(x - 1, y);
+            addFood(x, y + 1);
+            addFood(x, y - 1);
+        }
+    }
 
     int getCurrent(const int &x, const int &y) const {
         return foodCurrent[x][y];

@@ -18,7 +18,7 @@ bool Animal::debug_fov = false;
 bool Animal::big_textures = false;
 const int Animal::INIT_FOOD_AMOUNT = 300;
 int Prey::ID_COUNT = 0;
-const double Prey::SQUARED_DIST_SEPARATION = 0.015;
+const double Animal::SQUARED_DIST_SEPARATION = 0.015;
 const double Predator::SQUARED_DIST_EAT = 0.01;
 const int N_PREYS = 25;
 const int N_PREDATORS = 5;
@@ -180,7 +180,7 @@ void renderFunction()
         preys[i]->update(preys, predators);
         if (!preys[i]->consumeEnergy())
         {
-            preys[i]->kill();
+            preys[i]->kill(&food);
             delete preys[i];
             preys.erase(preys.begin() + i);
             continue;
@@ -192,11 +192,11 @@ void renderFunction()
     }
     for (unsigned int i = 0; i < predators.size(); i++)
     {
-        predators[i]->update(preys);
+        predators[i]->update(preys, predators);
         predators[i]->eatFood(preys);
         if (!predators[i]->consumeEnergy())
         {
-            predators[i]->kill();
+            predators[i]->kill(&food);
             delete predators[i];
             predators.erase(predators.begin() + i);
             continue;
