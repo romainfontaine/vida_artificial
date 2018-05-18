@@ -44,7 +44,6 @@ public:
     }
 
     Prey* crossoverMutation(const Prey &o) const {
-        std::cout << "Reproduced prey" << std::endl;
         Animal a = Animal::crossoverMutation(o);
         return new Prey(food, a);
     }

@@ -39,7 +39,6 @@ public:
     }
 
     Predator* crossoverMutation(const Predator &o) const {
-        std::cout << "Reproduced predator" << std::endl;
         Animal a = Animal::crossoverMutation(o);
         return new Predator(a);
     }

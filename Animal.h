@@ -35,9 +35,7 @@ public:
                 diff += std::abs(react.getV(i, j) - a->react.getV(i, j));
             }
         }
-        std::cout << diff << std::endl;
-        bool v = diff < 200.;
-        return (can_reproduce[a] = v);
+        return (can_reproduce[a] = diff < 250.);
     }
 
 
@@ -98,10 +96,10 @@ public:
                     p->foodStock / p->metabolism >= minTTLToReproduce &&
                     squaredTorusDistance(*p) <= vision * vision && compareSkin(p)) {
                 preys.push_back((T*) ((T*)this)->T::crossoverMutation(*p));
-                double nx = (p->x - x) / 2 + p->x;
-                double ny = (p->y - y) / 2 + p->y;
+                double nx = (p->x - x) / 2. + p->x;
+                double ny = (p->y - y) / 2. + p->y;
                 preys.back()->setPosition(nx, ny);
-                std::cout << *preys.back() << std::endl;
+                //std::cout << *preys.back() << std::endl;
                 foodStock -= reproduceCost;
                 p->foodStock -= reproduceCost;
             }
@@ -111,7 +109,7 @@ public:
     Animal crossoverMutation(const Animal &o) const {
         std::random_device rd;
         std::mt19937 gen(rd());
-        std::normal_distribution<> mut(0, 1);
+        std::normal_distribution<> mut(0, .2);
         std::uniform_real_distribution<> dis_crossover(0, 1);
         std::uniform_int_distribution<> dis_bool(0, 1);
 
@@ -148,7 +146,6 @@ public:
         *stop = true;
         if (f != NULL) {
             int x = (this->x + 1) / 2. * f->n_food_sites, y = (this->y + 1) / 2. * f->n_food_sites;
-            std::cout << x << " " << y << std::endl;
             for (int i = 0; i < foodStock; i++)
                 f->addFood(x, y);
         }
