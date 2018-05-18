@@ -9,9 +9,8 @@ class Predator;
 
 class Prey : public Animal {
     // Source for basic boid rules: http://www.kfish.org/boids/pseudocode.html
-    static int ID_COUNT;
 protected:
-    int id, vision_int;
+    int vision_int;
     Food* food;
 public:
 
@@ -20,8 +19,7 @@ public:
     }
 
     Prey(Food* f, const Animal &an)
-    : Animal(an),
-    id(ID_COUNT++), vision_int(vision * 50), food(f) {
+    : Animal(an), vision_int(vision * 50), food(f) {
         react = ReactionDiffusion(0.0545, 0.062);
         react.initReact(skin_xinit, skin_yinit, skin_radius);
         genTexture();

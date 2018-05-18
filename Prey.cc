@@ -30,6 +30,13 @@ void Prey::update(const std::vector<Prey*> &preys,
         vx += e.first * 1000;
         vy += e.second * 1000;
     }
+    if(vx == 0 && vy == 0){
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_real_distribution<> d(-1, 1);
+        vx = d(gen);
+        vy = d(gen);
+    }
     updatePosition_NormalizeSpeed();
     eatFood();
 }
@@ -50,12 +57,6 @@ bool Prey::escapePredator(const std::vector<Predator*> &predators,
             danger = true;
         }
     }
-    /*
-    if (danger && Animal::debug)
-    {
-        drawCircle(x, y, .05, 1, 0, 0);
-    }
-     */
     return danger;
 }
 
@@ -81,10 +82,14 @@ void Prey::eatFood()
 
 std::pair<double, double> Prey::cohesion(const std::vector<Prey*> &preys) const
 {
+    if (preys.size() == 1)
+    {
+        return std::make_pair(0, 0);
+    }
     double sx = 0, sy = 0;
     for (const Prey* b : preys)
     {
-        if (b->id == id)
+        if (b != this)
             continue;
         sx += b->x;
         sy += b->y;
@@ -97,10 +102,14 @@ std::pair<double, double> Prey::cohesion(const std::vector<Prey*> &preys) const
 
 std::pair<double, double> Prey::alignment(const std::vector<Prey*> &preys) const
 {
+    if (preys.size() == 1)
+    {
+        return std::make_pair(0, 0);
+    }
     double sx = 0, sy = 0;
     for (const Prey* b : preys)
     {
-        if (b->id == id)
+        if (b != this)
             continue;
         sx += b->vx;
         sy += b->vy;
