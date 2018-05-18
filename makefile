@@ -8,7 +8,7 @@ main: $(OBJ)
 	$(COMPILER) $^ -o $@ $(GENERATE_CMD) 
 	
 Prey.o: Food.h Tools.h Animal.h Prey.h Predator.h ReactionDiffusion.h
-Main.o: Food.h Tools.h Animal.h TurtleInterpreter.h LSystem.h Plant.h Prey.h Predator.h ReactionDiffusion.h
+Main.o: Stats.h Food.h Tools.h Animal.h TurtleInterpreter.h LSystem.h Plant.h Prey.h Predator.h ReactionDiffusion.h
 
 
 %.o: %.cc

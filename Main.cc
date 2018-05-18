@@ -12,6 +12,7 @@
 #include "Plant.h"
 #include "Prey.h"
 #include "Predator.h"
+#include "Stats.h"
 
 bool Animal::debug = true;
 bool Animal::debug_fov = false;
@@ -109,6 +110,7 @@ static Plant p3(Turtle(.02, 20, 0, -1, 1, .1), LSystem('F',{
 
 #include "Food.h"
 Food food(100);
+Stats stats[] = {Stats("# Individuals"), Stats("# Preys"), Stats("# Predators"), Stats("AVG Prey Vision")};
 #include "Animal.h"
 #include "Prey.h"
 #include "Predator.h"
@@ -158,6 +160,7 @@ void texture(const unsigned char* texDat, unsigned int tw, unsigned int th,
     glBindTexture(GL_TEXTURE_2D, 0);
     glDeleteTextures(1, &tex);
 }
+int currentStats = 0;
 
 void renderFunction()
 {
@@ -206,9 +209,19 @@ void renderFunction()
         predators[i]->draw();
     }
     food.regenerateFood();
-
+    stats[0].add(predators.size() + preys.size());
+    stats[1].add(preys.size());
+    stats[2].add(predators.size());
+    double avgVision = 0;
+    for (auto &a : preys)
+    {
+        avgVision = a->getVision();
+    }
+    if (preys.size() != 0)
+        avgVision /= preys.size();
+    stats[3].add(avgVision);
     food.Draw();
-
+    stats[currentStats].Draw();
     glColor3f(1.0, 1.0, 1.0);
     for (int i = 0; i < 5; i++)
         react.iterate();
@@ -236,6 +249,11 @@ void keyboard_handler(unsigned char key, int x, int y)
         Animal::big_textures = !Animal::big_textures;
     if (key == 'v' || key == 'V')
         Animal::debug_fov = !Animal::debug_fov;
+    if (key == 'i' || key == 'I')
+    {
+        currentStats++;
+        currentStats %= sizeof (stats) / sizeof (Stats);
+    }
 }
 
 int main(int argc, char** argv)
