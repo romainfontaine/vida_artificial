@@ -117,49 +117,6 @@ Stats stats[] = {Stats("# Individuals"), Stats("# Preys"), Stats("# Predators"),
 static std::vector<Prey*> preys;
 static std::vector<Predator*> predators;
 
-#include "ReactionDiffusion.h"
-ReactionDiffusion react(0.034, 0.0618); //(0.0353, .0566);
-
-void texture(const unsigned char* texDat, unsigned int tw, unsigned int th,
-        double x = 0, double y = 0, double w = 1, double h = 1)
-{
-    // Source: https://stackoverflow.com/a/24266568/4384857
-    //upload to GPU texture
-    GLuint tex;
-    glGenTextures(1, &tex);
-    glBindTexture(GL_TEXTURE_2D, tex);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tw, th, 0, GL_RGB, GL_UNSIGNED_BYTE, texDat);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    //clear and draw quad with texture (could be in display callback)
-    glBindTexture(GL_TEXTURE_2D, tex);
-    glEnable(GL_TEXTURE_2D);
-
-    glBegin(GL_QUADS);
-    glTexCoord2i(0, 0);
-    glVertex2f(x, y);
-    glTexCoord2i(0, 1);
-    glVertex2f(x, y + h);
-    glTexCoord2i(1, 1);
-    glVertex2f(x + w, y + h);
-    glTexCoord2i(1, 0);
-    glVertex2f(x + w, y);
-    glEnd(); /*
-    glBegin(GL_POLYGON);
-    for (const Point &p : fish1)
-    {
-        glVertex2f(p.x*.2, p.y*.2);
-        glTexCoord2f(p.x, .5+p.y);
-    }
-    glEnd();*/
-
-
-    glDisable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glDeleteTextures(1, &tex);
-}
 int currentStats = 0;
 
 void renderFunction()
@@ -174,9 +131,6 @@ void renderFunction()
     p2.Draw();
     p3.Draw();
 
-    std::random_device rd;
-    std::default_random_engine re(rd());
-    std::uniform_real_distribution<double> unif(-1, 1);
     for (unsigned int i = 0; i < preys.size(); i++)
     {
         preys[i]->update(preys, predators);
@@ -186,8 +140,6 @@ void renderFunction()
             delete preys[i];
             preys.erase(preys.begin() + i);
             continue;
-            //preys[i] = Prey::individual(&food, &fish2);
-            //preys[i]->setPosition(unif(re), unif(re));
         }
         preys[i]->reproduce(preys);
         preys[i]->draw();
@@ -202,8 +154,6 @@ void renderFunction()
             delete predators[i];
             predators.erase(predators.begin() + i);
             continue;
-            //predators[i] = Predator::individual(&fish1);
-            //predators[i]->setPosition(unif(re), unif(re));
         }
         predators[i]->reproduce(predators);
         predators[i]->draw();
@@ -222,12 +172,6 @@ void renderFunction()
     stats[3].add(avgVision);
     food.Draw();
     stats[currentStats].Draw();
-    glColor3f(1.0, 1.0, 1.0);
-    for (int i = 0; i < 5; i++)
-        react.iterate();
-
-
-    //react.generateUCharArray();texture(react.toUCharArray(), react.getSize(), react.getSize(), -.5, -.5, 1, 1);
 
     glFlush();
 }
@@ -258,8 +202,6 @@ void keyboard_handler(unsigned char key, int x, int y)
 
 int main(int argc, char** argv)
 {
-    react.initReact(20, 20, 5);
-
     // X, Y, QTY
     unsigned int food_sites_sp[][3] = {
         {50, 65, 3500},
