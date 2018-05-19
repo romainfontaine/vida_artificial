@@ -111,13 +111,14 @@ static Plant p3(Turtle(.02, 20, 0, -1, 1, .1), LSystem('F',{
 #include "Food.h"
 Food food(100);
 Stats stats[] = {
-    Stats("# Individuals"),
-    Stats("# Preys"),
-    Stats("# Predators"),
-    Stats("AVG Prey Vision"),
-    Stats("AVG Prey Metabolism"),
-    Stats("AVG Predator Vision"),
-    Stats("AVG Predator Metabolism")
+    Stats("# of Individuals", 0),
+    Stats("# of Preys", 0),
+    Stats("# of Predators", 0),
+    Stats("Average Vision"),
+    Stats("Average Metabolism"),
+    Stats("Average Life expectancy"),
+    Stats("Average Wealth"),
+    Stats("Average Speed", 3),
 };
 #include "Animal.h"
 #include "Prey.h"
@@ -125,11 +126,10 @@ Stats stats[] = {
 static std::vector<Prey*> preys;
 static std::vector<Predator*> predators;
 
-int currentStats = 0;
+static int currentStats = 0;
 
 void renderFunction()
 {
-
     glClearColor(0.0, 0.0, 0.0, 0.0);
     glClear(GL_COLOR_BUFFER_BIT);
     glColor3f(1.0, 1.0, 1.0);
@@ -167,39 +167,41 @@ void renderFunction()
         predators[i]->draw();
     }
     food.regenerateFood();
+
+    float lifeExp = 0, wealth = 0, speed = 0, avgVision = 0, avgMetabolism = 0;
+    for (auto &a : preys)
+    {
+        avgVision += a->getVision();
+        avgMetabolism += a->getMetabolism();
+        lifeExp += a->getAgeLimit();
+        wealth += a->getFoodStock();
+        speed += a->getSpeed();
+    }
+    for (auto &a : predators)
+    {
+        avgVision += a->getVision();
+        avgMetabolism += a->getMetabolism();
+        lifeExp += a->getAgeLimit();
+        wealth += a->getFoodStock();
+        speed += a->getSpeed();
+    }
+    if (predators.size() + preys.size() != 0)
+    {
+        wealth /= predators.size() + preys.size();
+        lifeExp /= predators.size() + preys.size();
+        speed /= predators.size() + preys.size();
+        avgVision /= predators.size() + preys.size();
+        avgMetabolism /= predators.size() + preys.size();
+    }
     stats[0].add(predators.size() + preys.size());
     stats[1].add(preys.size());
     stats[2].add(predators.size());
-    {
-        float avgVision = 0, avgMetabolism = 0;
-        for (auto &a : preys)
-        {
-            avgVision = a->getVision();
-            avgMetabolism = a->getMetabolism();
-        }
-        if (preys.size() != 0)
-        {
-            avgVision /= preys.size();
-            avgMetabolism /= preys.size();
-        }
-        stats[3].add(avgVision);
-        stats[4].add(avgMetabolism);
-    }
-    {
-        float avgVision = 0, avgMetabolism = 0;
-        for (auto &a : predators)
-        {
-            avgVision = a->getVision();
-            avgMetabolism = a->getMetabolism();
-        }
-        if (predators.size() != 0)
-        {
-            avgVision /= predators.size();
-            avgMetabolism /= predators.size();
-        }
-        stats[5].add(avgVision);
-        stats[6].add(avgMetabolism);
-    }
+    stats[3].add(avgVision);
+    stats[4].add(avgMetabolism);
+    stats[5].add(lifeExp);
+    stats[6].add(wealth);
+    stats[7].add(speed);
+
     food.Draw();
     stats[currentStats].Draw();
 
@@ -230,6 +232,30 @@ void keyboard_handler(unsigned char key, int x, int y)
     }
 }
 
+const int WIDTH = 1920;
+const int HEIGHT = 1080;
+
+void mouse_handler(int button, int state, int x, int y)
+{
+    if (state != GLUT_DOWN)
+        return;
+    if (button == GLUT_LEFT_BUTTON || button == GLUT_RIGHT_BUTTON)
+    {
+        double x_ = x * 2 / (double) WIDTH - 1, y_ = -(y * 2 / (double) HEIGHT - 1);
+
+        if (button == GLUT_LEFT_BUTTON)
+        {
+            preys.push_back(Prey::individual(&food, &fish2));
+            preys.back()->setPosition(x_, y_);
+        }
+        else
+        {
+            predators.push_back(Predator::individual(&fish1));
+            predators.back()->setPosition(x_, y_);
+        }
+    }
+}
+
 int main(int argc, char** argv)
 {
     // X, Y, QTY
@@ -239,7 +265,6 @@ int main(int argc, char** argv)
         {25, 15, 2000},
     };
     food.generateFoodSandpile(food_sites_sp, sizeof (food_sites_sp) / sizeof (int) / 3);
-
 
     std::random_device rd;
     std::default_random_engine re(rd());
@@ -255,16 +280,16 @@ int main(int argc, char** argv)
         predators.push_back(Predator::individual(&fish1));
         predators.back()->setPosition(unif(re), unif(re));
     }
-
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_SINGLE);
-    glutInitWindowSize(1920, 1080);
+    glutInitWindowSize(WIDTH, HEIGHT);
     glutInitWindowPosition(0, 0);
     glutCreateWindow("ALife");
     glutDisplayFunc(renderFunction);
     glEnable(GL_BLEND); // Enable transparency
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glutKeyboardFunc(keyboard_handler);
+    glutMouseFunc(mouse_handler);
     timer(0);
     glutMainLoop();
     return 0;

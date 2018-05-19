@@ -19,9 +19,11 @@
 class Stats {
     std::vector<float> values;
     std::string name;
+    unsigned int n_decimals;
 public:
 
-    explicit Stats(std::string name) : name(name) {
+    explicit Stats(std::string name, unsigned int n_decimals = 2) : name(name),
+    n_decimals(n_decimals) {
 
     }
 
@@ -45,8 +47,8 @@ public:
             max = std::max(max, values[i]);
             min = std::min(min, values[i]);
         }
-        displayText(x - .05, y, 1, 1, 1, toString(max, 2));
-        displayText(x - .05, y - 1 * scale, 1, 1, 1, toString(min, 2));
+        displayText(x - .07, y, 1, 1, 1, toString(max, n_decimals));
+        displayText(x - .07, y - 1 * scale, 1, 1, 1, toString(min, n_decimals));
         displayText(x + 1 * scale, y - 1.1 * scale, 1, 1, 1, std::to_string(values.size()));
         displayText(x, y - 1.1 * scale, 1, 1, 1, "0");
         displayText(x + .33 * scale, y - 1.1 * scale, 1, 1, 1, name);

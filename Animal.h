@@ -12,8 +12,8 @@ protected:
     static const double SQUARED_DIST_SEPARATION;
     static const int INIT_FOOD_AMOUNT;
     const std::vector<Point> *shape;
-    double x, y, vx, vy, vmax, xscale, yscale, perspective, vision;
-    int foodStock, metabolism, age, agelimit;
+    double x, y, vx, vy, vmax, xscale, yscale, perspective, vision, metabolism;
+    int foodStock, age, agelimit;
     int skin_xinit, skin_yinit, skin_radius;
     bool sex;
     ReactionDiffusion react;
@@ -29,6 +29,18 @@ public:
 
     double getMetabolism() {
         return metabolism;
+    }
+
+    double getAgeLimit() {
+        return agelimit;
+    }
+
+    double getFoodStock() {
+        return foodStock;
+    }
+    
+    double getSpeed(){
+        return vmax;
     }
 
     bool compareSkin(Animal* a) {
@@ -52,7 +64,7 @@ public:
     static bool big_textures;
 
     Animal(const std::vector<Point> *shape, const double &x = 0, const double &y = 0,
-            const int &foodStock = INIT_FOOD_AMOUNT, const int &metabolism = 1,
+            const int &foodStock = INIT_FOOD_AMOUNT, const double &metabolism = 1,
             const int &agelimit = 1000, const double &vmax = .005,
             const double &xscale = .15, const double&yscale = .15, const double &perspective = 0.,
             const double &vision = .7,
@@ -61,7 +73,7 @@ public:
     : shape(shape), x(x), y(y), vx(0), vy(0), vmax(clamp(vmax, .001, .006)),
     xscale(clamp(xscale, .075, .12)), yscale(clamp(yscale, .075, .12)),
     perspective(clamp(perspective, -.15, .15)), vision(clamp(vision, .5, .7)),
-    foodStock(foodStock), metabolism(clamp(metabolism, 1, 2)), age(0),
+    metabolism(clamp(metabolism, 1., 2.)), foodStock(foodStock), age(0),
     agelimit(clamp(agelimit, 1500, 2500)),
     skin_xinit(clamp(skin_xinit, 0, ReactionDiffusion::size)), skin_yinit(clamp(skin_yinit, 0, ReactionDiffusion::size)),
     skin_radius(clamp(skin_radius, 1, 2)), sex(sex),
@@ -80,7 +92,7 @@ public:
     static Animal individual(const std::vector<Point> *shape) {
         std::random_device rd;
         std::mt19937 gen(rd());
-        std::uniform_int_distribution<> dis_meta(1, 2);
+        std::uniform_real_distribution<> dis_meta(1, 2);
         std::uniform_int_distribution<> dis_bool(0, 1);
         std::normal_distribution<> dis_age(2000, 300);
         std::uniform_real_distribution<> dis_speed(.001, .006);
