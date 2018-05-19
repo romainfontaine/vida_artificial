@@ -110,7 +110,15 @@ static Plant p3(Turtle(.02, 20, 0, -1, 1, .1), LSystem('F',{
 
 #include "Food.h"
 Food food(100);
-Stats stats[] = {Stats("# Individuals"), Stats("# Preys"), Stats("# Predators"), Stats("AVG Prey Vision")};
+Stats stats[] = {
+    Stats("# Individuals"),
+    Stats("# Preys"),
+    Stats("# Predators"),
+    Stats("AVG Prey Vision"),
+    Stats("AVG Prey Metabolism"),
+    Stats("AVG Predator Vision"),
+    Stats("AVG Predator Metabolism")
+};
 #include "Animal.h"
 #include "Prey.h"
 #include "Predator.h"
@@ -162,14 +170,36 @@ void renderFunction()
     stats[0].add(predators.size() + preys.size());
     stats[1].add(preys.size());
     stats[2].add(predators.size());
-    double avgVision = 0;
-    for (auto &a : preys)
     {
-        avgVision = a->getVision();
+        float avgVision = 0, avgMetabolism = 0;
+        for (auto &a : preys)
+        {
+            avgVision = a->getVision();
+            avgMetabolism = a->getMetabolism();
+        }
+        if (preys.size() != 0)
+        {
+            avgVision /= preys.size();
+            avgMetabolism /= preys.size();
+        }
+        stats[3].add(avgVision);
+        stats[4].add(avgMetabolism);
     }
-    if (preys.size() != 0)
-        avgVision /= preys.size();
-    stats[3].add(avgVision);
+    {
+        float avgVision = 0, avgMetabolism = 0;
+        for (auto &a : predators)
+        {
+            avgVision = a->getVision();
+            avgMetabolism = a->getMetabolism();
+        }
+        if (predators.size() != 0)
+        {
+            avgVision /= predators.size();
+            avgMetabolism /= predators.size();
+        }
+        stats[5].add(avgVision);
+        stats[6].add(avgMetabolism);
+    }
     food.Draw();
     stats[currentStats].Draw();
 

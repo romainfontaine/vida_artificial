@@ -23,8 +23,12 @@ protected:
     std::map<Animal*, bool> can_reproduce;
 public:
 
-    double getVision(){
+    double getVision() {
         return vision;
+    }
+
+    double getMetabolism() {
+        return metabolism;
     }
 
     bool compareSkin(Animal* a) {

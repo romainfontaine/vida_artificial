@@ -44,8 +44,17 @@ inline void drawCircle(const float &x, const float &y, const float &r,
 }
 
 template<class T>
-inline T clamp(const T &a,const T &min, const T &max){
+inline T clamp(const T &a, const T &min, const T &max) {
     return std::max(min, std::min(a, max));
+}
+#include <sstream>
+#include <iomanip>
+
+template<class T>
+inline std::string toString(T num, int n_decimals) {
+    std::ostringstream ss;
+    ss << std::fixed << std::setprecision(n_decimals) << num;
+    return ss.str();
 }
 
 #endif /* TOOLS_H */
