@@ -17,7 +17,7 @@
 bool Animal::debug = true;
 bool Animal::debug_fov = false;
 bool Animal::big_textures = false;
-const int Animal::INIT_FOOD_AMOUNT = 300;
+const int Animal::INIT_FOOD_AMOUNT = 500;
 const double Animal::SQUARED_DIST_SEPARATION = 0.015;
 const double Predator::SQUARED_DIST_EAT = 0.01;
 const int N_PREYS = 25;

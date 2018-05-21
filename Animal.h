@@ -107,7 +107,7 @@ public:
     template<class T>
     void reproduce(std::vector<T*> &preys) {
         const int minTTLToReproduce = 500;
-        const int reproduceCost = 170;
+        const int reproduceCost = INIT_FOOD_AMOUNT/2+20;
         const int min_reprod_age = 200;
         if (foodStock / metabolism < minTTLToReproduce || age < min_reprod_age)
             return;
