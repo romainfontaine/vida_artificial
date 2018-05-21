@@ -38,8 +38,8 @@ public:
     double getFoodStock() {
         return foodStock;
     }
-    
-    double getSpeed(){
+
+    double getSpeed() {
         return vmax;
     }
 
@@ -106,22 +106,49 @@ public:
 
     template<class T>
     void reproduce(std::vector<T*> &preys) {
-        const int minTTLToReproduce = 500;
-        const int reproduceCost = INIT_FOOD_AMOUNT/2+20;
+        const bool BETTER_REPROD = true;
+        const int reproduceCost = INIT_FOOD_AMOUNT / 2 + 20;
         const int min_reprod_age = 200;
-        if (foodStock / metabolism < minTTLToReproduce || age < min_reprod_age)
-            return;
-        for (T *p : preys) {
-            if (sex != p->sex && p->age >= min_reprod_age &&
-                    p->foodStock / p->metabolism >= minTTLToReproduce &&
-                    squaredTorusDistance(*p) <= vision * vision && compareSkin(p)) {
-                preys.push_back((T*) ((T*)this)->T::crossoverMutation(*p));
-                double nx = (p->x - x) / 2. + p->x;
-                double ny = (p->y - y) / 2. + p->y;
-                preys.back()->setPosition(nx, ny);
-                //std::cout << *preys.back() << std::endl;
-                foodStock -= reproduceCost;
-                p->foodStock -= reproduceCost;
+        if (BETTER_REPROD) {
+            const int minTTLToReproduce = 200;
+            if (age < min_reprod_age)
+                return;
+            for (T *p : preys) {
+                if (sex != p->sex && p->age >= min_reprod_age &&
+                        squaredTorusDistance(*p) <= vision * vision && compareSkin(p)) {
+                    float myRatio = foodStock / (float) (p->foodStock + foodStock),
+                            otherRatio = p->foodStock / (float) (p->foodStock + foodStock);
+                    int myReprodCost = myRatio*reproduceCost*2;
+                    int otherReprodCost = otherRatio*reproduceCost*2;
+                    if ((foodStock - myReprodCost) / metabolism < minTTLToReproduce ||
+                            (p->foodStock - otherReprodCost) / p->metabolism < minTTLToReproduce) {
+                        continue;
+                    }
+                    preys.push_back((T*) ((T*)this)->T::crossoverMutation(*p));
+                    double nx = (p->x - x) / 2. + p->x;
+                    double ny = (p->y - y) / 2. + p->y;
+                    preys.back()->setPosition(nx, ny);
+                    foodStock -= myReprodCost;
+                    p->foodStock -= otherReprodCost;
+                }
+            }
+
+        } else {
+            const int minTTLToReproduce = 500;
+            if (foodStock / metabolism < minTTLToReproduce || age < min_reprod_age)
+                return;
+            for (T *p : preys) {
+                if (sex != p->sex && p->age >= min_reprod_age &&
+                        p->foodStock / p->metabolism >= minTTLToReproduce &&
+                        squaredTorusDistance(*p) <= vision * vision && compareSkin(p)) {
+
+                    preys.push_back((T*) ((T*)this)->T::crossoverMutation(*p));
+                    double nx = (p->x - x) / 2. + p->x;
+                    double ny = (p->y - y) / 2. + p->y;
+                    preys.back()->setPosition(nx, ny);
+                    foodStock -= reproduceCost;
+                    p->foodStock -= reproduceCost;
+                }
             }
         }
     }
@@ -196,7 +223,6 @@ protected:
     }
 
     void gen() {
-
         for (int i = 0; i < 5000 && !*stop; i++)
             react.iterate();
         if (!*stop)
