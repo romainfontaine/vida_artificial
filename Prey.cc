@@ -15,15 +15,15 @@ void Prey::update(const std::vector<Prey*> &preys,
 {
     std::pair<double, double> e;
     std::pair<double, double> s = separation(preys);
-    vx += s.first;
-    vy += s.second;
+    vx += s.first*5;
+    vy += s.second*5;
     if (!escapePredator(predators, e))
     {
         std::pair<double, double> c = cohesion(preys);
         std::pair<double, double> a = alignment(preys);
         std::pair<double, double> f = foodMove();
-        vx += f.first + c.first + a.first;
-        vy += f.second + c.second + a.second;
+        vx += f.first*10 + c.first*.5 + a.first;
+        vy += f.second*10 + c.second*.5 + a.second;
     }
     else
     {
@@ -97,7 +97,7 @@ std::pair<double, double> Prey::cohesion(const std::vector<Prey*> &preys) const
     sx /= preys.size() - 1;
     sy /= preys.size() - 1;
 
-    return std::make_pair(sx / 100, sy / 100);
+    return std::make_pair(x < 0 ? sx - x : x - sx, y < 0 ? sy - y : y - sy);
 }
 
 std::pair<double, double> Prey::alignment(const std::vector<Prey*> &preys) const
