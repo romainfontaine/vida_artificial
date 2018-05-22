@@ -127,7 +127,7 @@ Stats stats[] = {
 static std::vector<Prey*> preys;
 static std::vector<Predator*> predators;
 
-static int currentStats = 0;
+static int currentStats = 0, currentStats2 = 0;
 
 void randomPopulation()
 {
@@ -226,6 +226,8 @@ void renderFunction()
 
     food.Draw();
     stats[currentStats].Draw();
+    if (currentStats2 != 0)
+        stats[currentStats2 - 1].Draw(-.9, .4);
 
     glFlush();
 }
@@ -252,6 +254,12 @@ void keyboard_handler(unsigned char key, int x, int y)
         currentStats++;
         currentStats %= sizeof (stats) / sizeof (Stats);
     }
+    if (key == 'o' || key == 'O')
+    {
+        currentStats2++;
+        currentStats2 %= sizeof (stats) / sizeof (Stats) + 1;
+    }
+
 }
 
 const int WIDTH = 1920;
