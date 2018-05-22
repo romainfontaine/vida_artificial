@@ -17,6 +17,7 @@
 bool Animal::debug = true;
 bool Animal::debug_fov = false;
 bool Animal::big_textures = false;
+const int Animal::FOOD_CAPACITY = 5000;
 const int Animal::INIT_FOOD_AMOUNT = 500;
 const double Animal::SQUARED_DIST_SEPARATION = 0.015;
 const double Predator::SQUARED_DIST_EAT = 0.01;
@@ -281,9 +282,9 @@ int main(int argc, char** argv)
 {
     // X, Y, QTY
     unsigned int food_sites_sp[][3] = {
-        {50, 65, 3500},
-        {80, 35, 1500},
-        {25, 15, 2000},
+        {50, 70, 4000},
+        {80, 35, 2500},
+        {25, 15, 3000},
     };
     food.generateFoodSandpile(food_sites_sp, sizeof (food_sites_sp) / sizeof (int) / 3);
 

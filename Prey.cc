@@ -15,22 +15,23 @@ void Prey::update(const std::vector<Prey*> &preys,
 {
     std::pair<double, double> e;
     std::pair<double, double> s = separation(preys);
-    vx += s.first*5;
-    vy += s.second*5;
+    vx += s.first * 5;
+    vy += s.second * 5;
     if (!escapePredator(predators, e))
     {
         std::pair<double, double> c = cohesion(preys);
         std::pair<double, double> a = alignment(preys);
         std::pair<double, double> f = foodMove();
-        vx += f.first*10 + c.first*.5 + a.first;
-        vy += f.second*10 + c.second*.5 + a.second;
+        vx += f.first * 10 + c.first * .5 + a.first;
+        vy += f.second * 10 + c.second * .5 + a.second;
     }
     else
     {
         vx += e.first * 1000;
         vy += e.second * 1000;
     }
-    if(vx == 0 && vy == 0){
+    if (vx == 0 && vy == 0)
+    {
         std::random_device rd;
         std::mt19937 gen(rd());
         std::uniform_real_distribution<> d(-1, 1);
@@ -65,9 +66,9 @@ void Prey::eatFood()
     int xgrid = (x + 1) / 2 * food->n_food_sites;
     int ygrid = (y + 1) / 2 * food->n_food_sites;
     const int food_radius = 3;
-    for (int i = -food_radius; i <= food_radius; i++)
+    for (int i = -food_radius; i <= food_radius && foodStock < FOOD_CAPACITY; i++)
     {
-        for (int j = -food_radius; j <= food_radius; j++)
+        for (int j = -food_radius; j <= food_radius && foodStock < FOOD_CAPACITY; j++)
         {
             int x = positive_modulo(xgrid + i, food->n_food_sites);
             int y = positive_modulo(ygrid + j, food->n_food_sites);
@@ -121,6 +122,8 @@ std::pair<double, double> Prey::alignment(const std::vector<Prey*> &preys) const
 
 std::pair<double, double> Prey::foodMove() const
 {
+    if (foodStock >= FOOD_CAPACITY)
+        return std::make_pair(0, 0);
     int xgrid = (x + 1) / 2 * food->n_food_sites;
     int ygrid = (y + 1) / 2 * food->n_food_sites;
     int maxF = -1, dirX = 0, dirY = 0, minD = 0;

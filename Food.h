@@ -18,7 +18,7 @@ class Food {
 public:
     const int n_food_sites;
 private:
-    const int maxCapacity = 16;
+    const int maxCapacity = 20;
     int** foodCapacity;
     int** foodCurrent;
     int** foodSeason;
@@ -132,7 +132,7 @@ public:
                 if (currentSeason == foodSeason[i][j]) {
                     foodCurrent[i][j] = std::min(foodCurrent[i][j] + 1, foodCapacity[i][j]);
                 } else if (foodSeason[i][j] != -1 && foodCurrent[i][j] < 0) {
-                    foodCurrent[i][j] = -100;
+                    foodCurrent[i][j] = -30;
                 }
             }
         }

@@ -11,6 +11,7 @@ class Animal {
 protected:
     static const double SQUARED_DIST_SEPARATION;
     static const int INIT_FOOD_AMOUNT;
+    static const int FOOD_CAPACITY;
     const std::vector<Point> *shape;
     double x, y, vx, vy, vmax, xscale, yscale, perspective, vision, metabolism;
     int foodStock, age, agelimit;
