@@ -76,7 +76,7 @@ public:
     metabolism(clamp(metabolism, 1., 2.)), foodStock(foodStock), age(0),
     agelimit(clamp(agelimit, 1500, 2500)),
     skin_xinit(clamp(skin_xinit, 0, ReactionDiffusion::size)), skin_yinit(clamp(skin_yinit, 0, ReactionDiffusion::size)),
-    skin_radius(clamp(skin_radius, 1, 2)), sex(sex),
+    skin_radius(clamp(skin_radius, 1, 3)), sex(sex),
     done(new std::atomic<bool>(false)), stop(new std::atomic<bool>(false)) {
     }
 
@@ -172,16 +172,16 @@ public:
                 b_skinr = dis_crossover(gen);
 
         return Animal(shape, 0, 0, INIT_FOOD_AMOUNT,
-                b_meta * metabolism + (1 - b_meta) * o.metabolism + mut(gen),
-                b_age * agelimit + (1 - b_age) * o.agelimit + mut(gen),
-                b_speed * vmax + (1 - b_speed) * o.vmax + mut(gen)*.1,
+                b_meta * metabolism + (1 - b_meta) * o.metabolism + mut(gen)*.5,
+                b_age * agelimit + (1 - b_age) * o.agelimit + mut(gen)*10,
+                b_speed * vmax + (1 - b_speed) * o.vmax + mut(gen)*.005,
                 b_xscale * xscale + (1 - b_xscale) * o.xscale + mut(gen)*.1,
                 b_yscale * yscale + (1 - b_yscale) * o.yscale + mut(gen)*.1,
                 b_persp * perspective + (1 - b_persp) * o.perspective + mut(gen)*.1,
                 b_vision * vision + (1 - b_vision) * o.vision + mut(gen)*.1,
-                b_skinx * (float) skin_xinit + (1 - b_skinx) * (float) o.skin_xinit + mut(gen)*.1,
-                b_skiny * (float) skin_yinit + (1 - b_skiny) * (float) o.skin_yinit + mut(gen)*.1,
-                b_skinr * skin_radius + (1 - b_skinr) * o.skin_radius + mut(gen)*.1,
+                b_skinx * (float) skin_xinit + (1 - b_skinx) * (float) o.skin_xinit + mut(gen)*5,
+                b_skiny * (float) skin_yinit + (1 - b_skiny) * (float) o.skin_yinit + mut(gen)*5,
+                b_skinr * skin_radius + (1 - b_skinr) * o.skin_radius + mut(gen),
                 dis_bool(gen) == 1);
     }
 
