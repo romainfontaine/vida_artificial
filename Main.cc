@@ -128,6 +128,24 @@ static std::vector<Predator*> predators;
 
 static int currentStats = 0;
 
+void randomPopulation()
+{
+    std::random_device rd;
+    std::default_random_engine re(rd());
+
+    std::uniform_real_distribution<double> unif(-1, 1);
+    for (int i = 0; i < N_PREYS; i++)
+    {
+        preys.push_back(Prey::individual(&food, &fish2));
+        preys.back()->setPosition(unif(re), unif(re));
+    }
+    for (int i = 0; i < N_PREDATORS; i++)
+    {
+        predators.push_back(Predator::individual(&fish1));
+        predators.back()->setPosition(unif(re), unif(re));
+    }
+}
+
 void renderFunction()
 {
     glClearColor(0.0, 0.0, 0.0, 0.0);
@@ -138,6 +156,9 @@ void renderFunction()
     p1.Draw();
     p2.Draw();
     p3.Draw();
+
+    if (!preys.size() && !predators.size())
+        randomPopulation();
 
     for (unsigned int i = 0; i < preys.size(); i++)
     {
@@ -266,20 +287,7 @@ int main(int argc, char** argv)
     };
     food.generateFoodSandpile(food_sites_sp, sizeof (food_sites_sp) / sizeof (int) / 3);
 
-    std::random_device rd;
-    std::default_random_engine re(rd());
-
-    std::uniform_real_distribution<double> unif(-1, 1);
-    for (int i = 0; i < N_PREYS; i++)
-    {
-        preys.push_back(Prey::individual(&food, &fish2));
-        preys.back()->setPosition(unif(re), unif(re));
-    }
-    for (int i = 0; i < N_PREDATORS; i++)
-    {
-        predators.push_back(Predator::individual(&fish1));
-        predators.back()->setPosition(unif(re), unif(re));
-    }
+    randomPopulation();
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_SINGLE);
     glutInitWindowSize(WIDTH, HEIGHT);
