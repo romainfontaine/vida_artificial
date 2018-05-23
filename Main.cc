@@ -23,6 +23,7 @@ const double Animal::SQUARED_DIST_SEPARATION = 0.015;
 const double Predator::SQUARED_DIST_EAT = 0.01;
 const int N_PREYS = 25;
 const int N_PREDATORS = 5;
+static const int FPS_LIMIT = 30;
 
 static std::vector<Point> fish1{
     {0.0625, -0.0692307692, 1},
@@ -111,6 +112,7 @@ static Plant p3(Turtle(.02, 20, 0, -1, 1, .1), LSystem('F',{
 
 #include "Food.h"
 Food food(100);
+int lastTime = 0;
 Stats stats[] = {
     Stats("# of Individuals", 0),
     Stats("# of Preys", 0),
@@ -120,13 +122,13 @@ Stats stats[] = {
     Stats("Average Life expectancy"),
     Stats("Average Wealth"),
     Stats("Average Speed", 3),
+    Stats("FPS", 0),
 };
 #include "Animal.h"
 #include "Prey.h"
 #include "Predator.h"
 static std::vector<Prey*> preys;
 static std::vector<Predator*> predators;
-
 static int currentStats = 0, currentStats2 = 0;
 
 void randomPopulation()
@@ -149,6 +151,12 @@ void randomPopulation()
 
 void renderFunction()
 {
+    int newTime = glutGet(GLUT_ELAPSED_TIME);
+    int diff = newTime - lastTime;
+    float fps = 1. / ((float) diff / 1000.);
+    stats[8].add(fps);
+    lastTime = newTime;
+
     glClearColor(0.0, 0.0, 0.0, 0.0);
     glClear(GL_COLOR_BUFFER_BIT);
     glColor3f(1.0, 1.0, 1.0);
@@ -236,7 +244,7 @@ void timer(int)
 {
 
     glutPostRedisplay();
-    glutTimerFunc(1000 / 30, timer, 0);
+    glutTimerFunc(1000 / FPS_LIMIT, timer, 0);
 }
 
 void keyboard_handler(unsigned char key, int x, int y)
@@ -259,7 +267,8 @@ void keyboard_handler(unsigned char key, int x, int y)
         currentStats2++;
         currentStats2 %= sizeof (stats) / sizeof (Stats) + 1;
     }
-
+    if (key == 'q')
+        glutLeaveMainLoop();
 }
 
 const int WIDTH = 1920;
