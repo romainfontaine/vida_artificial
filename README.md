@@ -1,6 +1,6 @@
 # Artificial Life - Final project
 ## Introduction
-This project is part of the Artificial Life course at the [National University of Colombia](http://unal.edu.co/), taught by [Jonatan Gómez](http://dis.unal.edu.co/~jgomezpe/).
+This project is part of the Artificial Life course at the [National University of Colombia](http://unal.edu.co/), taught by [Jonatan Gómez](http://dis.unal.edu.co/~jgomezpe/). A short video showing the execution of this project is available [here](https://vimeo.com/272810680).
 
 This project has been implemented with C++ and OpenGL. The environment is toroidal, and populated with two spieces of fish, which are predators and preys. Preys gather energy by eating food growing close to plants. Predators gather energy by eating preys. Both species have properties, determined by their genetic code. These properties are the metabolism (energy-consumption rate), vision range, maximum speed, among others. They also have the ability to reproduce, leading to open-ended evolution.
 
